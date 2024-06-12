@@ -1,0 +1,2 @@
+WINDOW_TITLE = "My Application"
+WINDOW_SIZE = "400x400"
