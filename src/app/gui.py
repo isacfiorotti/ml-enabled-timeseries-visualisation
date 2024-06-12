@@ -1,5 +1,5 @@
 import tkinter as tk
-from PIL import Image, ImageTk
+from math import sqrt, ceil
 
 class MainApp(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
@@ -13,18 +13,49 @@ class MainApp(tk.Frame):
         self.bg = tk.Frame(self)
         self.bg.pack(fill='both', expand=True)
 
+        #window
+        self.window = tk.PanedWindow(self.bg, orient='vertical')
+        self.window.pack(fill='both', expand=True)
+
         #top frame
-        self.top = tk.Frame(self.bg)
+        self.top = tk.PanedWindow(self.bg, orient='horizontal')
         self.top.pack(side='top', fill='both', expand=True)
+        self.window.add(self.top, stretch='always')
 
         #grid_view
-        self.grid_view = tk.Frame(self.top, bg='light blue')
-        self.grid_view.pack(padx=5, pady=5, side='left', fill='both', expand=True)
+        self.grid_view = GridView(self.top, grid_size=9) # change this to dynamically update grid_size
+        self.top.add(self.grid_view, stretch='always')
 
         #treemap
         self.treemap = tk.Frame(self.top, bg='yellow')
-        self.treemap.pack(padx=5, pady=5, side='right', fill='both', expand=True)
+        self.top.add(self.treemap, stretch='always')
 
         #bottom frame
-        self.bottom = tk.Frame(self.bg)
-        self.bottom.pack(side='bottom', fill='both', expand=True)
+        self.bottom = tk.Frame(self.bg, bg='light green')
+        self.window.add(self.bottom, stretch='always')
+
+
+
+class GridView(tk.Frame):
+    def __init__(self, parent, grid_size, *args, **kwargs):
+        super().__init__(parent, *args, **kwargs)
+        self.grid_size = grid_size
+        self.create_grid()
+
+
+    def create_grid(self):
+        self.cols = int(sqrt(self.grid_size))
+        self.rows = ceil(self.grid_size / self.cols)
+
+        if self.rows * self.cols < self.grid_size:
+            self.cols += 1
+        
+        cell_count = 0
+        for i in range(self.rows):
+            for j in range(self.cols):
+                if cell_count < self.grid_size:
+                    button = tk.Button(self, relief='flat')
+                    button.grid(row=i, column=j, sticky="nsew")
+                    self.grid_columnconfigure(j, weight=1)
+                    cell_count += 1
+            self.grid_rowconfigure(i, weight=1)
