@@ -32,8 +32,8 @@ class TreemapView(tk.Frame):
             x0, y0, x1, y1 = rect['x'], rect['y'], rect['x'] + rect['dx'], rect['y'] + rect['dy']
             rectangle_id = self.canvas.create_rectangle(x0, y0, x1, y1, fill=color, outline="white")
             self.canvas.create_text((x0 + x1) / 2, (y0 + y1) / 2, text=label, fill="black")
-            self.canvas.tag_bind(rectangle_id, '<Button-1>', lambda event, label=label: self.on_rectangle_click(event, label))
+            self.canvas.tag_bind(rectangle_id, '<Button-1>', lambda event, label=label: self.on_click(event, label))
 
-    def on_rectangle_click(self, event, label):
+    def on_click(self, event, label):
         pass
 
