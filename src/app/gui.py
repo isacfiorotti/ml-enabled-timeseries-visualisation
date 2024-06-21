@@ -1,6 +1,7 @@
 import tkinter as tk
 from math import sqrt, ceil
 from app.lineplot import LineView
+from app.treemap import TreemapView
 
 class MainApp(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
@@ -10,36 +11,42 @@ class MainApp(tk.Frame):
     
     def init_ui(self):
         
-        #background
-        self.bg = tk.Frame(self)
-        self.bg.pack(fill='both', expand=True)
-
         #window
-        self.window = tk.PanedWindow(self.bg, orient='vertical')
+        self.window = tk.Frame(self)
         self.window.pack(fill='both', expand=True)
 
+        #background
+        self.background = tk.PanedWindow(self.window, orient='vertical')
+        self.background.pack(fill='both', expand=True)
+
         #top frame
-        self.top = tk.PanedWindow(self.bg, orient='horizontal')
+        self.top = tk.PanedWindow(self.window, orient='horizontal') # Top frame is a paned window for dividing left and right
         self.top.pack(side='top', fill='both', expand=True)
-        self.window.add(self.top, stretch='always')
+        self.background.add(self.top, stretch='always')
 
         #grid_view
-        self.grid_view = GridView(self.top, grid_size=7) # change this to dynamically update grid_size
-        self.top.add(self.grid_view, stretch='always')
+        self.grid_frame = tk.Frame(self.top)
+        self.top.add(self.grid_frame, stretch='always')
+        self.grid_view = tk.Canvas(self.grid_frame, background='red')
+        self.grid_view.pack(fill='both', expand=True)
 
         #treemap
-        self.treemap = tk.Frame(self.top, bg='yellow')
-        self.top.add(self.treemap, stretch='always')
-
+        self.treemap_frame = tk.Frame(self.top)
+        self.top.add(self.treemap_frame, stretch='always')
+        self.treemap = TreemapView(self.treemap_frame)
+        self.treemap.pack(fill='both', expand=True)
+        
         #bottom frame
-        self.bottom = tk.Frame(self.bg, bg='light green')
-        self.window.add(self.bottom, stretch='always')
+        self.bottom = tk.Frame(self.window, background='light green')
+        self.bottom.pack(side='bottom', fill='both', expand=True)
+        self.background.add(self.bottom, stretch='always')
+        
 
         #lineview
         self.line_view = LineView(self.bottom)
         self.line_view.pack(fill='both', expand=True)
         
-# Possibly migrate this to a different script and import the functions as needed
+# Possibly migrate this to a different script and import the functions as needed and change to canvas instead of buttons for better results
 
 class GridView(tk.Frame):
     def __init__(self, parent, grid_size, *args, **kwargs):
@@ -63,3 +70,4 @@ class GridView(tk.Frame):
                     self.grid_columnconfigure(j, weight=1)
                     cell_count += 1
             self.grid_rowconfigure(i, weight=1)
+
