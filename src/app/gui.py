@@ -39,8 +39,6 @@ class MainApp(tk.Frame):
         self.line_view = LineView(self.bottom)
         self.line_view.pack(fill='both', expand=True)
         
-
-
 # Possibly migrate this to a different script and import the functions as needed
 
 class GridView(tk.Frame):
