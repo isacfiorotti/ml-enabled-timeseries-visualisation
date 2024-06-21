@@ -1,4 +1,5 @@
 import tkinter as tk
+from math import ceil, sqrt
 
 class GridView(tk.Frame):
     def __init__(self, parent, grid_size, *args, **kwargs):
