@@ -12,12 +12,12 @@ class TreemapView(tk.Frame):
 
     def on_resize(self, event):
         # Sample data
-        data = [500, 300, 200, 100, 50]
+        data = [500, 300, 200, 100, 50] # numbers must be sorted descending
         labels = ["A", "B", "C", "D", "E"]
         colors = ["red", "blue", "green", "purple", "orange"]
 
-        self.width = event.height
-        self.height = event.width
+        self.width = event.width
+        self.height = event.height
         self.canvas.config(width=self.width, height=self.height)
 
         norm_data = squarify.normalize_sizes(data, self.width, self.height)
