@@ -1,5 +1,6 @@
 import tkinter as tk
 from math import sqrt, ceil
+from app.lineplot import LineView
 
 class MainApp(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
@@ -23,7 +24,7 @@ class MainApp(tk.Frame):
         self.window.add(self.top, stretch='always')
 
         #grid_view
-        self.grid_view = GridView(self.top, grid_size=9) # change this to dynamically update grid_size
+        self.grid_view = GridView(self.top, grid_size=7) # change this to dynamically update grid_size
         self.top.add(self.grid_view, stretch='always')
 
         #treemap
@@ -34,14 +35,19 @@ class MainApp(tk.Frame):
         self.bottom = tk.Frame(self.bg, bg='light green')
         self.window.add(self.bottom, stretch='always')
 
+        #lineview
+        self.line_view = LineView(self.bottom)
+        self.line_view.pack(fill='both', expand=True)
+        
 
+
+# Possibly migrate this to a different script and import the functions as needed
 
 class GridView(tk.Frame):
     def __init__(self, parent, grid_size, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
         self.grid_size = grid_size
         self.create_grid()
-
 
     def create_grid(self):
         self.cols = int(sqrt(self.grid_size))
