@@ -1,7 +1,7 @@
 import tkinter as tk
-from math import sqrt, ceil
 from app.lineplot import LineView
 from app.treemap import TreemapView
+from app.gridview import GridView
 
 class MainApp(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
@@ -15,14 +15,14 @@ class MainApp(tk.Frame):
         self.window = tk.Frame(self)
         self.window.pack(fill='both', expand=True)
 
-        #background
-        self.background = tk.PanedWindow(self.window, orient='vertical')
-        self.background.pack(fill='both', expand=True)
+        #vertical_paned_window
+        self.vertical_paned_window = tk.PanedWindow(self.window, orient='vertical')
+        self.vertical_paned_window.pack(fill='both', expand=True)
 
         #top frame
         self.top = tk.PanedWindow(self.window, orient='horizontal') # Top frame is a paned window for dividing left and right
         self.top.pack(side='top', fill='both', expand=True)
-        self.background.add(self.top, stretch='always')
+        self.vertical_paned_window.add(self.top, stretch='always')
 
         #grid_view
         self.grid_frame = tk.Frame(self.top)
@@ -39,7 +39,7 @@ class MainApp(tk.Frame):
         #bottom frame
         self.bottom = tk.Frame(self.window, background='light green')
         self.bottom.pack(side='bottom', fill='both', expand=True)
-        self.background.add(self.bottom, stretch='always')
+        self.vertical_paned_window.add(self.bottom, stretch='always')
         
         #lineview
         self.line_view = LineView(self.bottom)
