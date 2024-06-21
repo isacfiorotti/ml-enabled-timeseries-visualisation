@@ -11,6 +11,7 @@ class MainApp(tk.Frame):
     
     def init_ui(self):
         
+        #RENAME this variabel
         #window
         self.window = tk.Frame(self)
         self.window.pack(fill='both', expand=True)
@@ -27,7 +28,7 @@ class MainApp(tk.Frame):
         #grid_view
         self.grid_frame = tk.Frame(self.top)
         self.top.add(self.grid_frame, stretch='always')
-        self.grid_view = tk.Canvas(self.grid_frame, background='red')
+        self.grid_view = GridView(self.grid_frame, grid_size=90) # change to take input grid size from data
         self.grid_view.pack(fill='both', expand=True)
 
         #treemap
