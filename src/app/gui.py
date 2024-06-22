@@ -49,7 +49,7 @@ class MainWindow(tk.Frame):
         self.line_view.pack(fill='both', expand=True)
 
         #vis mediator
-        vis_mediator = VisMediator(self.treemap, self.grid_view, self.line_view)
+        vis_mediator = VisMediator(self.relation_manager ,self.treemap, self.grid_view, self.line_view)
         self.treemap.set_vis_mediator(vis_mediator)
         self.grid_view.set_vis_mediator(vis_mediator)
 

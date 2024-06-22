@@ -1,6 +1,6 @@
 class RelationManager():
     def __init__(self):
-        self.nodes, self.node_count, self.sequence = self._load_from_database()
+        self.nodes, self.node_count, self.sequence, self.signals = self._load_from_database()
     
     def _load_from_database(self):
         # Test functionality not actual implementation of _load_from_database
@@ -24,7 +24,14 @@ class RelationManager():
             'cell4':['signal4']
         }
 
-        return nodes, node_count, sequence
+        signals = {
+            'signal1':'cell0',
+            'signal2':'cell2',
+            'signal3':'cell3',
+            'signal4':'cell4',
+        }
+
+        return nodes, node_count, sequence, signals
                 
 
     def get_signals_in_node(self, node):
@@ -42,4 +49,8 @@ class RelationManager():
         """
         return list(self.node_count.values())
 
+    def get_signal_cell(self, signal):
+        """ Returns the cell associated with a node
+        """
+        return self.signals[signal]
         

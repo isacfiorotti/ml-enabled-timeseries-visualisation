@@ -44,7 +44,7 @@ class TreemapView(tk.Frame):
         self.vis_mediator.on_treemap_click()
 
     def on_enter(self, event, label):
-        print(self.relation_manager.get_signals_in_node(label))
+        self.vis_mediator.on_treemap_enter(label)
 
     def on_leave(self, event, label):
         pass
