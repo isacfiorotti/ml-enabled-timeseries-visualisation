@@ -1,11 +1,11 @@
 import tkinter as tk
-from app.gui import MainApp
+from app.gui import MainWindow
 
 def main():
     root = tk.Tk()
     root.geometry('800x600')
 
-    app = MainApp(root)
+    app = MainWindow(root)
     app.pack(fill='both', expand=True)
     app.mainloop()
 
