@@ -7,11 +7,17 @@ raw_data = {
     'signal4':[]
     }
 
-category = {
-    'group1':['signal1', 'signal2'],
-    'group2':['signal3'],
-    'group3':['signal4']
+nodes = {
+    'node1':['signal1', 'signal2'],
+    'node2':['signal3'],
+    'node3':['signal4']
     }
+
+node_count = {
+    'node1':2,
+    'node2':1,
+    'node3':1
+}
 
 sequence = {
     'cell1':['signal1'],

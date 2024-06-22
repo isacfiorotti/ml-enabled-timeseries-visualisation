@@ -2,18 +2,21 @@ import tkinter as tk
 import squarify # reference in work
 
 class TreemapView(tk.Frame):
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(self, parent, relation_manager, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
         # self.data = data (add param to __init__)
         self.parent = parent
+        self.relation_manager = relation_manager
         self.canvas = tk.Canvas(self)
         self.canvas.pack(fill='both', expand=True)
         self.bind('<Configure>', self.on_resize)
 
     def on_resize(self, event):
-        # Sample data
-        data = [500, 300, 200, 100, 50] # numbers must be sorted descending
-        labels = ["A", "B", "C", "D", "E"]
+
+        data = self.relation_manager.get_node_counts()
+        print("printing",data)
+        labels = self.relation_manager.get_nodes()
+        print(labels)
         colors = ["red", "blue", "green", "purple", "orange"]
 
         self.width = event.width

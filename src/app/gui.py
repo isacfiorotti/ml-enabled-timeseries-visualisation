@@ -2,12 +2,12 @@ import tkinter as tk
 from app.lineplot import LineView
 from app.treemap import TreemapView
 from app.gridview import GridView
-from app.signal_relation_manager import SignalRelationManager
 
 class MainWindow(tk.Frame):
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(self, parent, relation_manager, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
         self.parent = parent
+        self.relation_manager = relation_manager
         self.init_ui()
     
     def init_ui(self):
@@ -35,7 +35,7 @@ class MainWindow(tk.Frame):
         #treemap
         self.treemap_frame = tk.Frame(self.top)
         self.top.add(self.treemap_frame, stretch='always')
-        self.treemap = TreemapView(self.treemap_frame)
+        self.treemap = TreemapView(self.treemap_frame, self.relation_manager)
         self.treemap.pack(fill='both', expand=True)
         
         #bottom frame
