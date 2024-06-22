@@ -45,6 +45,3 @@ class TreemapView(tk.Frame):
 
     def on_enter(self, event, label):
         self.vis_mediator.on_treemap_enter(label)
-
-    def on_leave(self, event, label):
-        pass
