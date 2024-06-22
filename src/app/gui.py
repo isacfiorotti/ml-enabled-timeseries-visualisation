@@ -1,16 +1,18 @@
 import tkinter as tk
-from app.lineplot import LineView
+from app.lineview import LineView
 from app.treemap import TreemapView
 from app.gridview import GridView
+from app.vis_mediator import VisMediator
 
-class MainApp(tk.Frame):
-    def __init__(self, parent, *args, **kwargs):
+class MainWindow(tk.Frame):
+    def __init__(self, parent, relation_manager, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
         self.parent = parent
+        self.relation_manager = relation_manager
         self.init_ui()
     
     def init_ui(self):
-        
+
         #RENAME this variabel
         #window
         self.window = tk.Frame(self)
@@ -34,7 +36,7 @@ class MainApp(tk.Frame):
         #treemap
         self.treemap_frame = tk.Frame(self.top)
         self.top.add(self.treemap_frame, stretch='always')
-        self.treemap = TreemapView(self.treemap_frame)
+        self.treemap = TreemapView(self.treemap_frame, self.relation_manager)
         self.treemap.pack(fill='both', expand=True)
         
         #bottom frame
@@ -45,4 +47,9 @@ class MainApp(tk.Frame):
         #lineview
         self.line_view = LineView(self.bottom)
         self.line_view.pack(fill='both', expand=True)
+
+        #vis mediator
+        vis_mediator = VisMediator(self.relation_manager ,self.treemap, self.grid_view, self.line_view)
+        self.treemap.set_vis_mediator(vis_mediator)
+        self.grid_view.set_vis_mediator(vis_mediator)
 

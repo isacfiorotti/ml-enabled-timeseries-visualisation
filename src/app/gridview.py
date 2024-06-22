@@ -7,6 +7,7 @@ class GridView(tk.Frame):
         self.canvas = tk.Canvas(self)
         self.canvas.pack(fill='both', expand=True)
         self.grid_size = grid_size
+        self.cells = {}
         self.create_grid()
         self.canvas.bind("<Configure>", self.on_resize)
         self.padding = 5
@@ -21,25 +22,43 @@ class GridView(tk.Frame):
     def on_resize(self, event):
         self.canvas.delete("all")
         
-        width = event.width
-        height = event.height
+        self.width = event.width
+        self.height = event.height
         
-        cell_width = (width - (self.cols + 1) * self.padding) / self.cols
-        cell_height = (height - (self.rows + 1) * self.padding) / self.rows
-        
+        self.cell_width = (self.width - (self.cols + 1) * self.padding) / self.cols
+        self.cell_height = (self.height - (self.rows + 1) * self.padding) / self.rows
+
+        self.create_grid_view()
+    
+    def create_grid_view(self):
+
         cell_count = 0
         for i in range(self.rows):
             for j in range(self.cols):
                 if cell_count < self.grid_size:
-                    x1 = j * (cell_width + self.padding) + self.padding
-                    y1 = i * (cell_height + self.padding) + self.padding
-                    x2 = x1 + cell_width
-                    y2 = y1 + cell_height
+                    x1 = j * (self.cell_width + self.padding) + self.padding
+                    y1 = i * (self.cell_height + self.padding) + self.padding
+                    x2 = x1 + self.cell_width
+                    y2 = y1 + self.cell_height
                     rect = self.canvas.create_rectangle(x1, y1, x2, y2, fill="lightblue", outline="black")
                     
-                    self.canvas.tag_bind(rect, "<Button-1>", self.on_click)
+                    cell_name = f'cell{cell_count}'
+                    self.canvas.tag_bind(rect, "<Button-1>", lambda event, cell_name=cell_name: self.on_click(event, cell_name))
                     
+                    self.cells[cell_name] = rect
                     cell_count += 1
 
-    def on_click(self, event):
-        item = self.canvas.find_closest(event.x, event.y)[0]
+    def set_vis_mediator(self, vis_mediator):
+        self.vis_mediator = vis_mediator
+
+    def on_click(self, event, cell_name):
+        self.set_cell_color(cell_name, 'black')
+
+    def set_cell_color(self, cell_name, color):
+        if cell_name in self.cells:
+            self.canvas.itemconfig(self.cells[cell_name], fill=color)
+            
+
+        
+
+
