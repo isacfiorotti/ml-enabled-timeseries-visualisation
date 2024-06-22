@@ -17,24 +17,20 @@ class SignalRelationManager():
         }
 
         sequence = {
-            'cell1':['signal1'],
-            'cell2':[],
-            'cell3':['signal2'],
-            'cell4':['signal3'],
-            'cell5':['signal4']
+            'cell0':['signal1'],
+            'cell1':[],
+            'cell2':['signal2'],
+            'cell3':['signal3'],
+            'cell4':['signal4']
         }
 
         return nodes, node_count, sequence
-        
-    def get_related_signals(self, signal):
-        """ Returns list of signals in the same node
-        """
-        
+                
 
     def get_signals_in_node(self, node):
         """ Returns dictionary containing signals grouped into nodes 
         """
-        return self.nodes[node]
+        return list(self.nodes[node])
     
     def get_nodes(self):
         """ Returns a list of nodes
@@ -42,7 +38,7 @@ class SignalRelationManager():
         return list(self.nodes.keys())
 
     def get_node_counts(self):
-        """ Returns list of values
+        """ Returns list of counts for all nodes
         """
         return list(self.node_count.values())
 
