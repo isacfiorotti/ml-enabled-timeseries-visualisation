@@ -27,3 +27,10 @@ sequence = {
     'cell5':['signal4']
 }
 
+signals = {
+    'signal1':'cell1',
+    'signal2':'cell3',
+    'signal3':'cell4',
+    'signal4':'cell5'
+}
+
