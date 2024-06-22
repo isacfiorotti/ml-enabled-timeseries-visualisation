@@ -2,6 +2,7 @@ import tkinter as tk
 from app.lineplot import LineView
 from app.treemap import TreemapView
 from app.gridview import GridView
+from app.signal_relation_manager import SignalRelationManager
 
 class MainWindow(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
@@ -10,7 +11,7 @@ class MainWindow(tk.Frame):
         self.init_ui()
     
     def init_ui(self):
-        
+
         #RENAME this variabel
         #window
         self.window = tk.Frame(self)
