@@ -22,20 +22,24 @@ class GridView(tk.Frame):
     def on_resize(self, event):
         self.canvas.delete("all")
         
-        width = event.width
-        height = event.height
+        self.width = event.width
+        self.height = event.height
         
-        cell_width = (width - (self.cols + 1) * self.padding) / self.cols
-        cell_height = (height - (self.rows + 1) * self.padding) / self.rows
-        
+        self.cell_width = (self.width - (self.cols + 1) * self.padding) / self.cols
+        self.cell_height = (self.height - (self.rows + 1) * self.padding) / self.rows
+
+        self.create_grid_view()
+    
+    def create_grid_view(self):
+
         cell_count = 0
         for i in range(self.rows):
             for j in range(self.cols):
                 if cell_count < self.grid_size:
-                    x1 = j * (cell_width + self.padding) + self.padding
-                    y1 = i * (cell_height + self.padding) + self.padding
-                    x2 = x1 + cell_width
-                    y2 = y1 + cell_height
+                    x1 = j * (self.cell_width + self.padding) + self.padding
+                    y1 = i * (self.cell_height + self.padding) + self.padding
+                    x2 = x1 + self.cell_width
+                    y2 = y1 + self.cell_height
                     rect = self.canvas.create_rectangle(x1, y1, x2, y2, fill="lightblue", outline="black")
                     
                     cell_name = f'cell{cell_count}'
