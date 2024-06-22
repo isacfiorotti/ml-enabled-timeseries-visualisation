@@ -14,9 +14,7 @@ class TreemapView(tk.Frame):
     def on_resize(self, event):
 
         data = self.relation_manager.get_node_counts()
-        print("printing",data)
         labels = self.relation_manager.get_nodes()
-        print(labels)
         colors = ["red", "blue", "green", "purple", "orange"]
 
         self.width = event.width
@@ -43,7 +41,7 @@ class TreemapView(tk.Frame):
         print(f"Clicked on group: {label}")
 
     def on_enter(self, event, label):
-        print(f"Hovering: {label}")
+        print(self.relation_manager.get_signals_in_node(label))
 
     def on_leave(self, event, label):
         pass
