@@ -1,4 +1,4 @@
-class SignalRelationManager():
+class RelationManager():
     def __init__(self):
         self.nodes, self.node_count, self.sequence = self._load_from_database()
     
