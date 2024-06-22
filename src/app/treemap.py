@@ -37,8 +37,11 @@ class TreemapView(tk.Frame):
             self.canvas.tag_bind(rectangle_id, '<Button-1>', lambda event, label=label: self.on_click(event, label))
             self.canvas.tag_bind(rectangle_id, '<Enter>', lambda event, label=label: self.on_enter(event, label))
 
+    def set_vis_mediator(self, vis_mediator):
+        self.vis_mediator = vis_mediator
+
     def on_click(self, event, label):
-        print(f"Clicked on group: {label}")
+        self.vis_mediator.on_treemap_click()
 
     def on_enter(self, event, label):
         print(self.relation_manager.get_signals_in_node(label))

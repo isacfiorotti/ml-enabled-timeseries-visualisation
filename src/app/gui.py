@@ -1,7 +1,8 @@
 import tkinter as tk
-from app.lineplot import LineView
+from app.lineview import LineView
 from app.treemap import TreemapView
 from app.gridview import GridView
+from app.vis_mediator import VisMediator
 
 class MainWindow(tk.Frame):
     def __init__(self, parent, relation_manager, *args, **kwargs):
@@ -46,4 +47,9 @@ class MainWindow(tk.Frame):
         #lineview
         self.line_view = LineView(self.bottom)
         self.line_view.pack(fill='both', expand=True)
+
+        #vis mediator
+        vis_mediator = VisMediator(self.treemap, self.grid_view, self.line_view)
+        self.treemap.set_vis_mediator(vis_mediator)
+        self.grid_view.set_vis_mediator(vis_mediator)
 
