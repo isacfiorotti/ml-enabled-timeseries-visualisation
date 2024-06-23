@@ -4,7 +4,7 @@ import squarify # reference in work
 class TreemapView(tk.Frame):
     def __init__(self, parent, relation_manager, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
-        # self.data = data (add param to __init__)
+        
         self.parent = parent
         self.relation_manager = relation_manager
         self.nodes = {}
@@ -14,21 +14,24 @@ class TreemapView(tk.Frame):
 
     def on_resize(self, event):
 
-        data = self.relation_manager.get_node_counts()
+        #TODO Move this to the create_treemap function to allow for better readability
+        node_counts = self.relation_manager.get_node_counts()
         labels = self.relation_manager.get_nodes()
-        colors = ["red", "blue", "green", "purple", "orange"]
+
+        colors = ["red", "blue", "green", "purple", "orange"] #TODO change to allow for color pallets in config
 
         self.width = event.width
         self.height = event.height
         self.canvas.config(width=self.width, height=self.height)
 
-        norm_data = squarify.normalize_sizes(data, self.width, self.height)
-        rects = squarify.squarify(norm_data, 0, 0, self.width, self.height)
+        # Squarify is used to find the optimal arrangement for the treemap.
+        norm_node_counts = squarify.normalize_sizes(node_counts, self.width, self.height)
+        rects = squarify.squarify(norm_node_counts, 0, 0, self.width, self.height)
 
         self.create_treemap(rects, labels, colors)
 
     def create_treemap(self, rects, labels, colors):
-        self.canvas.delete("all")  # Clear the canvas before drawing
+        self.canvas.delete("all")
         
         for rect, label, color in zip(rects, labels, colors):
             x0, y0, x1, y1 = rect['x'], rect['y'], rect['x'] + rect['dx'], rect['y'] + rect['dy']
