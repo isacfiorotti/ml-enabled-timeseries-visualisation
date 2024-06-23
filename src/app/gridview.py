@@ -20,8 +20,6 @@ class GridView(tk.Frame):
             self.cols += 1
 
     def on_resize(self, event):
-
-        
         self.width = event.width
         self.height = event.height
         
