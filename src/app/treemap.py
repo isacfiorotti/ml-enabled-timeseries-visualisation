@@ -11,6 +11,7 @@ class TreemapView(tk.Frame):
         self.canvas = tk.Canvas(self)
         self.canvas.pack(fill='both', expand=True)
         self.bind('<Configure>', self.on_resize)
+        self.canvas.bind('<Leave>', self.on_leave)
 
     def on_resize(self, event):
 
@@ -42,6 +43,7 @@ class TreemapView(tk.Frame):
 
             self.canvas.tag_bind(node_id, '<Button-1>', lambda event, label=label: self.on_click(event, label))
             self.canvas.tag_bind(node_id, '<Enter>', lambda event, label=label: self.on_enter(event, label))
+    
 
     def set_vis_mediator(self, vis_mediator):
         self.vis_mediator = vis_mediator
@@ -52,3 +54,6 @@ class TreemapView(tk.Frame):
     def on_enter(self, event, label):
         color = self.nodes[label]['color']
         self.vis_mediator.on_treemap_enter(label, color)
+
+    def on_leave(self, event):
+        self.vis_mediator.on_treemap_leave()

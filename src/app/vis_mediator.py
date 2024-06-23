@@ -16,3 +16,6 @@ class VisMediator():
             cell = self.relation_manager.get_signal_cell(signal)
             self.grid_view.set_cell_color(cell, color)
 
+    def on_treemap_leave(self):
+        self.grid_view.create_grid_view()
+
