@@ -39,7 +39,7 @@ class TreemapView(tk.Frame):
             node_id = self.canvas.create_rectangle(x0, y0, x1, y1, fill=color, outline="white")
             self.canvas.create_text((x0 + x1) / 2, (y0 + y1) / 2, text=label, fill="black")
             
-            self.nodes[label] = {'color':color}
+            self.nodes[label] = {'color':color, 'toggle':False}
 
             self.canvas.tag_bind(node_id, '<Button-1>', lambda event, label=label: self.on_click(event, label))
             self.canvas.tag_bind(node_id, '<Enter>', lambda event, label=label: self.on_enter(event, label))
@@ -49,7 +49,8 @@ class TreemapView(tk.Frame):
         self.vis_mediator = vis_mediator
 
     def on_click(self, event, label):
-        self.vis_mediator.on_treemap_click()
+        toggle = self.nodes[label]['toggle']
+        self.vis_mediator.on_treemap_click(label, toggle)
 
     def on_enter(self, event, label):
         color = self.nodes[label]['color']

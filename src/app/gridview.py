@@ -47,6 +47,8 @@ class GridView(tk.Frame):
                     self.cells[cell_name] = rect
                     cell_count += 1
 
+        self.check_for_toggles()
+
     def set_vis_mediator(self, vis_mediator):
         self.vis_mediator = vis_mediator
 
@@ -56,8 +58,7 @@ class GridView(tk.Frame):
     def set_cell_color(self, cell_name, color):
         if cell_name in self.cells:
             self.canvas.itemconfig(self.cells[cell_name], fill=color)
-            
 
+    def check_for_toggles(self):
+        self.vis_mediator.resolve_treemap_toggles()
         
-
-
