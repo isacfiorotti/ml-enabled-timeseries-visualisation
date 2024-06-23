@@ -8,14 +8,16 @@ class RelationManager():
             'node1':['signal1', 'signal2'],
             'node2':['signal3'],
             'node3':['signal4'],
-            'node4':['signal5']
+            'node4':['signal5'],
+            'node5':['signal6']
         }
 
         node_count = {
             'node1':2,
             'node2':1,
             'node3':1,
-            'node4':1
+            'node4':1,
+            'node5':1
         }
 
         sequence = {
@@ -32,6 +34,7 @@ class RelationManager():
             'signal3':'cell3',
             'signal4':'cell4',
             'signal5':'cell5',
+            'signal6':'cell7'
         }
 
         return nodes, node_count, sequence, signals
