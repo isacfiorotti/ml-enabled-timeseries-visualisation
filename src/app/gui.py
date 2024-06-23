@@ -30,7 +30,7 @@ class MainWindow(tk.Frame):
         #grid_view
         self.grid_frame = tk.Frame(self.top)
         self.top.add(self.grid_frame, stretch='always')
-        self.grid_view = GridView(self.grid_frame, grid_size=90) # change to take input grid size from data
+        self.grid_view = GridView(self.grid_frame, grid_size=90) #TODO change to take input grid size from relation_manager
         self.grid_view.pack(fill='both', expand=True)
 
         #treemap
