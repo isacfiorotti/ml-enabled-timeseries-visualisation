@@ -45,7 +45,7 @@ class MainWindow(tk.Frame):
         self.vertical_paned_window.add(self.bottom, stretch='always')
         
         #lineview
-        self.line_view = LineView(self.bottom)
+        self.line_view = LineView(self.bottom) # put the line view into a frame
         self.line_view.pack(fill='both', expand=True)
 
         #vis mediator

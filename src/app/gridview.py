@@ -53,7 +53,7 @@ class GridView(tk.Frame):
         self.vis_mediator = vis_mediator
 
     def on_click(self, event, cell_name):
-        self.set_cell_color(cell_name, 'black')
+        self.vis_mediator.on_grid_view_click(cell_name)
 
     def set_cell_color(self, cell_name, color):
         if cell_name in self.cells:

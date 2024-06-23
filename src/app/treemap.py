@@ -32,7 +32,7 @@ class TreemapView(tk.Frame):
         self.create_treemap(rects, labels, colors)
 
     def create_treemap(self, rects, labels, colors):
-        self.canvas.delete("all")
+        self.canvas.delete('all')
         
         for rect, label, color in zip(rects, labels, colors):
             x0, y0, x1, y1 = rect['x'], rect['y'], rect['x'] + rect['dx'], rect['y'] + rect['dy']
