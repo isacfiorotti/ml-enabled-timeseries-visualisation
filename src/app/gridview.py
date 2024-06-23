@@ -20,7 +20,7 @@ class GridView(tk.Frame):
             self.cols += 1
 
     def on_resize(self, event):
-        self.canvas.delete("all")
+
         
         self.width = event.width
         self.height = event.height
@@ -31,6 +31,7 @@ class GridView(tk.Frame):
         self.create_grid_view()
     
     def create_grid_view(self):
+        self.canvas.delete("all")
 
         cell_count = 0
         for i in range(self.rows):
