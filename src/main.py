@@ -6,9 +6,9 @@ def main():
     root = tk.Tk()
     root.geometry('800x600')
 
-    relation_manager = DataMediator() #TODO change name to dao to better reflect use
+    data_mediator = DataMediator()
 
-    app = MainWindow(root, relation_manager)
+    app = MainWindow(root, data_mediator)
     app.pack(fill='both', expand=True)
     app.mainloop()
 
