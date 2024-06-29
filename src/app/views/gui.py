@@ -18,6 +18,8 @@ class MainWindow(tk.Frame):
         self.window = tk.Frame(self)
         self.window.pack(fill='both', expand=True)
 
+        #horizontal tab
+
         #vertical_paned_window
         self.vertical_paned_window = tk.PanedWindow(self.window, orient='vertical')
         self.vertical_paned_window.pack(fill='both', expand=True)
