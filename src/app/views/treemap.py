@@ -2,11 +2,11 @@ import tkinter as tk
 import squarify # reference in work
 
 class TreemapView(tk.Frame):
-    def __init__(self, parent, relation_manager, *args, **kwargs):
+    def __init__(self, parent, data_mediator, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
         
         self.parent = parent
-        self.relation_manager = relation_manager
+        self.data_mediator = data_mediator
         self.nodes = {}
         self.canvas = tk.Canvas(self)
         self.canvas.pack(fill='both', expand=True)
@@ -16,8 +16,8 @@ class TreemapView(tk.Frame):
     def on_resize(self, event):
 
         #TODO Move this to the create_treemap function to allow for better readability
-        node_counts = self.relation_manager.get_node_counts()
-        labels = self.relation_manager.get_nodes()
+        node_counts = self.data_mediator.get_node_counts()
+        labels = self.data_mediator.get_nodes()
 
         colors = ["red", "blue", "green", "purple", "orange"] #TODO change to allow for color pallets in config
 
