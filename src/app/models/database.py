@@ -25,7 +25,7 @@ class SQLiteDB(DataProcessor):
         # create func that tells user there is an error creating tables if they have not created a Time(s) in the first col
 
         headers = self.data_processor.get_data_headers()
-        for header in headers[1:]:
+        for header in headers[1:]: # Assumes Time (s) is first item
             header = self.sanitise(header)
             self.node_table = f'{header}_node_table'
             self.signal_table = f'{header}_signal_table'
