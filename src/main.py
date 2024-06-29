@@ -1,6 +1,6 @@
 import tkinter as tk
-from app.gui import MainWindow
-from app.relation_manager import RelationManager
+from app.views.gui import MainWindow
+from app.controllers.relation_manager import RelationManager
 
 def main():
     root = tk.Tk()

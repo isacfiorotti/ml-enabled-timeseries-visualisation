@@ -1,8 +1,8 @@
 import tkinter as tk
-from app.lineview import LineView
-from app.treemap import TreemapView
-from app.gridview import GridView
-from app.vis_mediator import VisMediator
+from app.views.lineview import LineView
+from app.views.treemap import TreemapView
+from app.views.gridview import GridView
+from app.controllers.vis_mediator import VisMediator
 
 class MainWindow(tk.Frame):
     def __init__(self, parent, relation_manager, *args, **kwargs):
