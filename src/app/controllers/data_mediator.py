@@ -1,9 +1,14 @@
+from app.models.data_processor import DataProcessor
+import pandas as pd
+
 class DataMediator():
     """ The data mediator class object is to be used as a way to cache the data that is to be displayed to prevent repeated queries and store the logic for 
     accessing the database
     """
-    def __init__(self):
+    def __init__(self, data_processor):
         self.nodes, self.node_count, self.sequence, self.signals = self._load_from_database()
+        self.data_processor = data_processor
+
     
     def _load_from_database(self):
         # Test functionality not actual implementation of _load_from_database
@@ -62,4 +67,8 @@ class DataMediator():
         """ Returns the cell associated with a node
         """
         return self.signals[signal]
-        
+    
+    def get_headers(self):
+        headers = self.data_processor.get_headers()
+        return headers
+    

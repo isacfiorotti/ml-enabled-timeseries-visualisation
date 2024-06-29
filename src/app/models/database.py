@@ -2,11 +2,10 @@
 import sqlite3
 import os
 import re
-from app.models.data_processor import DataProcessor
 
-class SQLiteDB(DataProcessor):
-    def __init__(self, file_path):
-        self.data_processor = DataProcessor(file_path)
+class SQLiteDB():
+    def __init__(self, file_path, data_processor):
+        self.data_processor = data_processor
         self.db_directory = os.path.dirname(file_path)
         self.prefix = self._get_db_prefix(file_path) # takes input data file path
         self._connect_to_db()
@@ -21,11 +20,11 @@ class SQLiteDB(DataProcessor):
         return os.path.splitext(os.path.basename(file_path))[0]
 
     def _create_tables(self):
-        #TODO Assuming Time(s) is always the first header, we must ignore it, 
-        # create func that tells user there is an error creating tables if they have not created a Time(s) in the first col
+        #TODO create func that tells user there is an error creating tables if they have not created a Time(s) in the first col
+        
+        headers = self.data_processor.get_headers()
 
-        headers = self.data_processor.get_data_headers()
-        for header in headers[1:]: # Assumes Time (s) is first item
+        for header in headers:
             header = self.sanitise(header)
             self.node_table = f'{header}_node_table'
             self.signal_table = f'{header}_signal_table'
