@@ -1,4 +1,7 @@
-class RelationManager():
+class DataMediator():
+    """ The data mediator class object is to be used as a way to cache the data that is to be displayed to prevent repeated queries and store the logic for 
+    accessing the database
+    """
     def __init__(self):
         self.nodes, self.node_count, self.sequence, self.signals = self._load_from_database()
     

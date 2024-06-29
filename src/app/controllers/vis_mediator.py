@@ -1,6 +1,6 @@
 class VisMediator():
-    def __init__(self, relation_manager, treemap, grid_view, line_view):
-        self.relation_manager = relation_manager
+    def __init__(self, data_mediator, treemap, grid_view, line_view):
+        self.data_mediator = data_mediator
         self.treemap = treemap
         self.grid_view = grid_view
         self.line_view = line_view
@@ -18,19 +18,23 @@ class VisMediator():
 
     def on_treemap_enter(self, node, color):
         self.grid_view.create_grid_view()
-        signals_in_node = self.relation_manager.get_signals_in_node(node)
+        signals_in_node = self.data_mediator.get_signals_in_node(node)
         for signal in signals_in_node:
             #find which cell that signal is in and color it
-            cell = self.relation_manager.get_signal_cell(signal)
+            cell = self.data_mediator.get_signal_cell(signal)
             self.grid_view.set_cell_color(cell, color)
 
     def on_treemap_leave(self):
         self.grid_view.create_grid_view()
         
-    def resolve_treemap_toggles(self):
+    def resolve_treemap_toggles(self): # This code is similar to treemap enter consider separating it into different things
         for node in self.toggled_nodes:
-            signals_in_node = self.relation_manager.get_signals_in_node(node)
+            signals_in_node = self.data_mediator.get_signals_in_node(node)
             for signal in signals_in_node:
-                cell = self.relation_manager.get_signal_cell(signal)
+                cell = self.data_mediator.get_signal_cell(signal)
                 color = self.toggled_nodes[node]['color']
                 self.grid_view.set_cell_color(cell, color)
+
+    def on_grid_view_click(self, cell_name):
+        fig = self.line_view.generate_plot()
+        self.line_view.create_lineview(fig)
