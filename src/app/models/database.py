@@ -1,1 +1,1 @@
-# This script will be in charge of managing the SQLLite3 database.
+# This script will be in charge of initialising and managing the database.

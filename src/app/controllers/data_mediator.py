@@ -1,4 +1,4 @@
-class RelationManager():
+class DataMediator():
     def __init__(self):
         self.nodes, self.node_count, self.sequence, self.signals = self._load_from_database()
     
