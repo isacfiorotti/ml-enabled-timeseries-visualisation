@@ -31,8 +31,6 @@ class SQLiteDB(DataProcessor):
             self.signal_table = f'{header}_signal_table'
             self.cell_table = f'{header}_cell_table'
 
-            print(self.node_table)
-
             self.cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS {self.node_table} (
                 NodeID VARCHAR(255) PRIMARY KEY,
