@@ -39,7 +39,7 @@ class TreemapView(tk.Frame):
             node_id = self.canvas.create_rectangle(x0, y0, x1, y1, fill=color, outline="white")
             self.canvas.create_text((x0 + x1) / 2, (y0 + y1) / 2, text=label, fill="black")
             
-            self.nodes[label] = {'color':color, 'toggle':False}
+            self.nodes[label] = {'color':color, 'toggle':False} # keeps track of whether button has been toggled 
 
             self.canvas.tag_bind(node_id, '<Button-1>', lambda event, label=label: self.on_click(event, label))
             self.canvas.tag_bind(node_id, '<Enter>', lambda event, label=label: self.on_enter(event, label))
