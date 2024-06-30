@@ -30,12 +30,14 @@ class SQLiteDB():
             self.signal_table = f'{header}_signal_table'
             self.cell_table = f'{header}_cell_table'
 
+            # node table
             self.cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS {self.node_table} (
                 node_id VARCHAR(255) PRIMARY KEY,
                 signal_count INT
             )''')
 
+            # signal table
             self.cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS {self.signal_table} (
                 signal_id VARCHAR(255) PRIMARY KEY,
@@ -44,9 +46,12 @@ class SQLiteDB():
                 FOREIGN KEY (node_id) REFERENCES {self.node_table}(node_id)
             )''')
 
+            # cell table
             self.cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS {self.cell_table} (
                 cell_id VARCHAR(255) PRIMARY KEY,
+                cell_id_start FLOAT,
+                cell_id_end FLOAT,
                 signal_id VARCHAR(255),
                 FOREIGN KEY (signal_id) REFERENCES {self.signal_table}(signal_id)
             )''')
