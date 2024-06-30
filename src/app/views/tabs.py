@@ -13,13 +13,11 @@ class Tabs(tk.Frame):
         pass
 
     def create_data_tabs(self, headers):
-        # Define the width, height and initial position of the rectangles
         rect_width = 120
         rect_height = 20
         x_start = 5
         y_start = 5
 
-        # Number of rectangles
         num_rectangles = len(headers)
 
         for i in range(num_rectangles):
