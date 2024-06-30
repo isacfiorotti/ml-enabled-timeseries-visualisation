@@ -21,7 +21,7 @@ class MainWindow(tk.Frame):
         self.window.pack(fill='both', expand=True)
 
         #horizontal tab
-        self.tab_frame = tk.Frame(self.window, background='lightgrey', height=20) # tab height
+        self.tab_frame = tk.Frame(self.window, background='darkblue', height=20) # tab height
         self.tab_frame.pack(fill='x')
         self.tabs = Tabs(self.tab_frame, self.data_mediator)
         self.tabs.pack(fill='both', expand=True)

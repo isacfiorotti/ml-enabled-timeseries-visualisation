@@ -19,7 +19,10 @@ class TreemapView(tk.Frame):
         node_counts = self.data_mediator.get_node_counts()
         labels = self.data_mediator.get_nodes()
 
-        colors = ["red", "blue", "green", "purple", "orange"] #TODO change to allow for color pallets in config
+        colors = ["#E74C3C", "#3498DB", "#27AE60", "#9B59B6", "#E67E22"] # Modern high-contrast palette for light grey background
+
+
+
 
         self.width = event.width
         self.height = event.height
@@ -37,7 +40,7 @@ class TreemapView(tk.Frame):
         for rect, label, color in zip(rects, labels, colors):
             x0, y0, x1, y1 = rect['x'], rect['y'], rect['x'] + rect['dx'], rect['y'] + rect['dy']
             node_id = self.canvas.create_rectangle(x0, y0, x1, y1, fill=color, outline="white")
-            self.canvas.create_text((x0 + x1) / 2, (y0 + y1) / 2, text=label, fill="black")
+            self.canvas.create_text((x0 + x1) / 2, (y0 + y1) / 2, text=label, fill="lightgrey")
             
             self.nodes[label] = {'color':color, 'toggle':False} # keeps track of whether button has been toggled 
 

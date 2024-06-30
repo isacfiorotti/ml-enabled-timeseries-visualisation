@@ -15,12 +15,38 @@ class LineView(tk.Frame):
         self.canvas.pack(fill='both', expand=True)
 
     def generate_plot(self):
-        #random line plot for testing purposes
+        # Random line plot for testing purposes
 
-        fig = plt.Figure(figsize=(5, 4), dpi=100)
+        fig = plt.Figure(figsize=(5, 4), dpi=100, facecolor='#D3D3D3')
+
         x = np.linspace(0, 10, 100)
         y = np.random.rand(100)
-        fig.add_subplot(111).plot(x, y)
+        ax = fig.add_subplot(111)
+        ax.plot(x, y, color='#2C3E50', linewidth=1)
+
+        # Remove the top and right spines (outlines)
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+
+        # Customize the color of the bottom and left spines
+        ax.spines['bottom'].set_color('gray')
+        ax.spines['left'].set_color('gray')
+
+        # Customize the color of the tick labels and ticks
+        ax.tick_params(axis='x', colors='gray')
+        ax.tick_params(axis='y', colors='gray')
+
+        # Set the color of the axis labels if needed
+        ax.xaxis.label.set_color('#C0C0C0')
+        ax.yaxis.label.set_color('#C0C0C0')
+
+        # Set the color of the title if needed
+        ax.title.set_color('lightgrey')
+
+        # Set the background color of the axis
+        ax.set_facecolor('#D3D3D3')
+
+        ax.grid(True, color='gray', linestyle='--', linewidth=0.5)
 
         return fig
 

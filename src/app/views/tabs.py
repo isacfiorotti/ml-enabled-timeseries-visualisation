@@ -31,8 +31,8 @@ class Tabs(tk.Frame):
                 y1,  # y1 position
                 x2,  # x2 position
                 y2,  # y2 position
-                fill='lightgrey',  # Fill color for rectangles
-                outline='lightgrey'  # Outline color for rectangles
+                fill='#DCDCDC',  # Fill color for rectangles
+                outline='#DCDCDC'  # Outline color for rectangles
             )
 
             text_x = (x1 + x2) / 2
@@ -42,7 +42,7 @@ class Tabs(tk.Frame):
                 text_x,
                 text_y,  
                 text=f'{headers[i]}',  # Text content
-                fill='black',  # Text color
+                fill='grey',  # Text color
                 font=('Arial', 7)
             )
         
