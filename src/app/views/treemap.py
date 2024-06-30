@@ -21,9 +21,6 @@ class TreemapView(tk.Frame):
 
         colors = ["#E74C3C", "#3498DB", "#27AE60", "#9B59B6", "#E67E22"] # Modern high-contrast palette for light grey background
 
-
-
-
         self.width = event.width
         self.height = event.height
         self.canvas.config(width=self.width, height=self.height)
@@ -40,11 +37,13 @@ class TreemapView(tk.Frame):
         for rect, label, color in zip(rects, labels, colors):
             x0, y0, x1, y1 = rect['x'], rect['y'], rect['x'] + rect['dx'], rect['y'] + rect['dy']
             node_id = self.canvas.create_rectangle(x0, y0, x1, y1, fill=color, outline="white")
-            self.canvas.create_text((x0 + x1) / 2, (y0 + y1) / 2, text=label, fill="lightgrey")
+            text = self.canvas.create_text((x0 + x1) / 2, (y0 + y1) / 2, text=label, fill="lightgrey")
             
             self.nodes[label] = {'color':color, 'toggle':False} # keeps track of whether button has been toggled 
 
             self.canvas.tag_bind(node_id, '<Button-1>', lambda event, label=label: self.on_click(event, label))
+            self.canvas.tag_bind(text, '<Button-1>', lambda event, label=label: self.on_click(event, label))
+
             self.canvas.tag_bind(node_id, '<Enter>', lambda event, label=label: self.on_enter(event, label))
     
 
