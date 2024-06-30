@@ -1,6 +1,7 @@
 import tkinter as tk
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 
 from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg, NavigationToolbar2Tk)
@@ -11,7 +12,7 @@ class LineView(tk.Frame):
         super().__init__(parent, *args, *kwargs)
         self.canvas_frame = tk.Frame(self)  # Frame for the canvas
         self.canvas_frame.pack(fill='both', expand=True)
-        self.fig = self.generate_plot(None)
+        self.fig = None
         self.canvas_fig = FigureCanvasTkAgg(self.fig, master=self.canvas_frame)
         self.canvas_fig.draw()
         self.canvas_fig.get_tk_widget().pack(fill=tk.BOTH, expand=True)
@@ -23,12 +24,15 @@ class LineView(tk.Frame):
         self.toolbar.update()
 
     def generate_plot(self, data):
-        # take as input the data
+
+        x, y = data.iloc[:, 0], data.iloc[:, 1]
+        
+        # downsample
+        x = x[:1000]
+        y = y[:1000]
 
         fig = plt.Figure(figsize=(5, 4), dpi=100, facecolor='#D3D3D3')
 
-        x = np.linspace(0, 10, 100) # get cell data 
-        y = np.random.rand(100)
         ax = fig.add_subplot(111)
         ax.plot(x, y, color='#2C3E50', linewidth=1)
 

@@ -88,5 +88,8 @@ class DataMediator():
         """
         sanitised = self.db.sanitise(self.current_tab)
         cursor = self.db.cursor.execute(f'SELECT * FROM {sanitised}_cell_table WHERE cell_id = ?', (cell_id,))
-        data = cursor.fetchone()
-        return data
+        query = cursor.fetchone()
+        data = self.data_processor.read_chunk(query[1], query[2])
+        filtered_data = data[['Time(s)', self.current_tab]]
+        return filtered_data
+    

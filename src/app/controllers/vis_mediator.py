@@ -38,7 +38,6 @@ class VisMediator():
 
     def on_grid_view_click(self, cell_id):
         data = self.data_mediator.get_cell_data(cell_id)
-        print(data)
         fig = self.line_view.generate_plot(data)
         self.line_view.create_lineview(fig)
     
