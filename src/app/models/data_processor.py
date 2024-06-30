@@ -48,3 +48,12 @@ class DataProcessor():
             column_list = data.columns.tolist()
             meta_data_df = pd.DataFrame(column_list)
             meta_data_df.to_csv(self.meta_data_path, index=False, header=False)
+
+    def read_chunk(self, start, end):
+        start = int(start)
+        end = int(end)
+        data = pd.read_csv(self.file_path, skiprows=range(1, start), nrows=end-start, header=None)
+        headers = self.get_headers()
+        headers.insert(0, 'Time(s)')
+        data.columns = headers
+        return data
