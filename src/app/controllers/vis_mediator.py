@@ -1,6 +1,7 @@
 class VisMediator():
-    def __init__(self, data_mediator, treemap, grid_view, line_view):
+    def __init__(self, data_mediator, tabs, treemap, grid_view, line_view):
         self.data_mediator = data_mediator
+        self.tabs = tabs
         self.treemap = treemap
         self.grid_view = grid_view
         self.line_view = line_view
@@ -35,6 +36,13 @@ class VisMediator():
                 color = self.toggled_nodes[node]['color']
                 self.grid_view.set_cell_color(cell, color)
 
-    def on_grid_view_click(self, cell_name):
-        fig = self.line_view.generate_plot()
+    def on_grid_view_click(self, cell_id):
+        data = self.data_mediator.get_cell_data(cell_id)
+        fig = self.line_view.generate_plot(data)
         self.line_view.create_lineview(fig)
+    
+    def on_tab_click(self, current_tab):
+        self.data_mediator._set_current_tab(current_tab)
+        grid_size = self.data_mediator.get_grid_size()
+        self.grid_view.set_grid_size(grid_size)
+        self.grid_view.create_grid_view()
