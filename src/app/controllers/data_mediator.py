@@ -10,7 +10,7 @@ class DataMediator():
         self.db = database
         self.file_path = file_path
         self.data_processor = data_processor
-        self.current_tab = ''
+        self.current_tab = None
     
     def _load_from_database(self):
         # Test functionality not actual implementation of _load_from_database
@@ -31,20 +31,20 @@ class DataMediator():
         }
 
         sequence = {
-            'cell0':['signal1'],
-            'cell1':['signal5'],
-            'cell2':['signal2'],
-            'cell3':['signal3'],
-            'cell4':['signal4']
+            'cell_0':['signal1'],
+            'cell_1':['signal5'],
+            'cell_2':['signal2'],
+            'cell_3':['signal3'],
+            'cell_4':['signal4']
         }
 
         signals = {
-            'signal1':'cell0',
-            'signal2':'cell2',
-            'signal3':'cell3',
-            'signal4':'cell4',
-            'signal5':'cell5',
-            'signal6':'cell7'
+            'signal1':'cell_0',
+            'signal2':'cell_2',
+            'signal3':'cell_3',
+            'signal4':'cell_4',
+            'signal5':'cell_5',
+            'signal6':'cell_7'
         }
 
         return nodes, node_count, sequence, signals
@@ -74,11 +74,19 @@ class DataMediator():
         headers = self.data_processor.get_headers()
         return headers
     
-    def get_grid_size(self, current_tab):
-        sanitised = self.db.sanitise(current_tab)
+    def get_grid_size(self):
+        sanitised = self.db.sanitise(self.current_tab)
         cursor = self.db.cursor.execute(f'SELECT COUNT(*) FROM {sanitised}_cell_table')
         grid_size = cursor.fetchone()[0]
         return grid_size
-
     
+    def _set_current_tab(self, current_tab):
+        self.current_tab = current_tab
 
+    def get_cell_data(self, cell_id):
+        """ Returns the data for a cell
+        """
+        sanitised = self.db.sanitise(self.current_tab)
+        cursor = self.db.cursor.execute(f'SELECT * FROM {sanitised}_cell_table WHERE cell_id = ?', (cell_id,))
+        data = cursor.fetchone()
+        return data

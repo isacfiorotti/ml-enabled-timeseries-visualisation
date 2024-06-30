@@ -36,11 +36,14 @@ class VisMediator():
                 color = self.toggled_nodes[node]['color']
                 self.grid_view.set_cell_color(cell, color)
 
-    def on_grid_view_click(self, cell_name):
-        fig = self.line_view.generate_plot()
+    def on_grid_view_click(self, cell_id):
+        data = self.data_mediator.get_cell_data(cell_id)
+        print(data)
+        fig = self.line_view.generate_plot(data)
         self.line_view.create_lineview(fig)
     
     def on_tab_click(self, current_tab):
-        grid_size = self.data_mediator.get_grid_size(current_tab)
+        self.data_mediator._set_current_tab(current_tab)
+        grid_size = self.data_mediator.get_grid_size()
         self.grid_view.set_grid_size(grid_size)
         self.grid_view.create_grid_view()

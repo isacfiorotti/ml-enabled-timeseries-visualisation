@@ -48,7 +48,7 @@ class GridView(tk.Frame):
                         y2 = y1 + self.cell_height
                         rect = self.canvas.create_rectangle(x1, y1, x2, y2, fill="#D3D3D3", outline="#D3D3D3")
                         
-                        cell_name = f'cell{cell_count}'
+                        cell_name = f'cell_{cell_count}'
                         self.canvas.tag_bind(rect, "<Button-1>", lambda event, cell_name=cell_name: self.on_click(event, cell_name))
                         
                         self.cells[cell_name] = rect

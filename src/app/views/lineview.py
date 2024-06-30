@@ -11,9 +11,7 @@ class LineView(tk.Frame):
         super().__init__(parent, *args, *kwargs)
         self.canvas_frame = tk.Frame(self)  # Frame for the canvas
         self.canvas_frame.pack(fill='both', expand=True)
-        
-        self.fig = self.generate_plot()
-        
+        self.fig = self.generate_plot(None)
         self.canvas_fig = FigureCanvasTkAgg(self.fig, master=self.canvas_frame)
         self.canvas_fig.draw()
         self.canvas_fig.get_tk_widget().pack(fill=tk.BOTH, expand=True)
@@ -24,12 +22,12 @@ class LineView(tk.Frame):
         self.toolbar = NavigationToolbar2Tk(self.canvas_fig, self.toolbar_frame)
         self.toolbar.update()
 
-    def generate_plot(self):
-        # Random line plot for testing purposes
+    def generate_plot(self, data):
+        # take as input the data
 
         fig = plt.Figure(figsize=(5, 4), dpi=100, facecolor='#D3D3D3')
 
-        x = np.linspace(0, 10, 100)
+        x = np.linspace(0, 10, 100) # get cell data 
         y = np.random.rand(100)
         ax = fig.add_subplot(111)
         ax.plot(x, y, color='#2C3E50', linewidth=1)
