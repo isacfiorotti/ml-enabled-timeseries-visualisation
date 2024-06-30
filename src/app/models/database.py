@@ -32,23 +32,23 @@ class SQLiteDB():
 
             self.cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS {self.node_table} (
-                NodeID VARCHAR(255) PRIMARY KEY,
-                SignalCount INT
+                node_id VARCHAR(255) PRIMARY KEY,
+                signal_count INT
             )''')
 
             self.cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS {self.signal_table} (
-                SignalID VARCHAR(255) PRIMARY KEY,
-                NodeID VARCHAR(255),
-                CellID VARCHAR(255),
-                FOREIGN KEY (NodeID) REFERENCES {self.node_table}(NodeID)
+                signal_id VARCHAR(255) PRIMARY KEY,
+                node_id VARCHAR(255),
+                cell_id VARCHAR(255),
+                FOREIGN KEY (node_id) REFERENCES {self.node_table}(node_id)
             )''')
 
             self.cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS {self.cell_table} (
-                CellID VARCHAR(255) PRIMARY KEY,
-                SignalID VARCHAR(255),
-                FOREIGN KEY (SignalID) REFERENCES {self.signal_table}(SignalID)
+                cell_id VARCHAR(255) PRIMARY KEY,
+                signal_id VARCHAR(255),
+                FOREIGN KEY (signal_id) REFERENCES {self.signal_table}(signal_id)
             )''')
 
             self.conn.commit()
