@@ -9,10 +9,20 @@ from matplotlib.backend_bases import key_press_handler
 class LineView(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
         super().__init__(parent, *args, *kwargs)
-        self.canvas = tk.Canvas(self)
+        self.canvas_frame = tk.Frame(self)  # Frame for the canvas
+        self.canvas_frame.pack(fill='both', expand=True)
+        
         self.fig = self.generate_plot()
-        self.canvas_fig = FigureCanvasTkAgg(self.fig, master=self.canvas)
-        self.canvas.pack(fill='both', expand=True)
+        
+        self.canvas_fig = FigureCanvasTkAgg(self.fig, master=self.canvas_frame)
+        self.canvas_fig.draw()
+        self.canvas_fig.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+
+        #toolbar
+        self.toolbar_frame = tk.Frame(self)  # Frame for the toolbar
+        self.toolbar_frame.pack(side=tk.BOTTOM, fill=tk.X)
+        self.toolbar = NavigationToolbar2Tk(self.canvas_fig, self.toolbar_frame)
+        self.toolbar.update()
 
     def generate_plot(self):
         # Random line plot for testing purposes
@@ -52,9 +62,14 @@ class LineView(tk.Frame):
 
     def create_lineview(self, fig):
         self.canvas_fig.get_tk_widget().destroy()
-        self.canvas_fig = FigureCanvasTkAgg(fig, master=self.canvas)
+        self.canvas_fig = FigureCanvasTkAgg(fig, master=self.canvas_frame)
         self.canvas_fig.draw()
         self.canvas_fig.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        
+        self.toolbar.destroy() 
+        self.toolbar = NavigationToolbar2Tk(self.canvas_fig, self.toolbar_frame)
+        self.toolbar.update()
+
         
 
     
