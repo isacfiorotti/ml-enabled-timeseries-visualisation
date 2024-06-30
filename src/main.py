@@ -14,7 +14,7 @@ def main():
     #TODO add function that checks for the data folder and checks if there are already files
     db = SQLiteDB(FILE_PATH, data_processor)
 
-    data_mediator = DataMediator(data_processor)
+    data_mediator = DataMediator(FILE_PATH, db, data_processor)
 
     app = MainWindow(root, data_mediator)
     app.pack(fill='both', expand=True)

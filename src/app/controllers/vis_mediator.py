@@ -1,6 +1,7 @@
 class VisMediator():
-    def __init__(self, data_mediator, treemap, grid_view, line_view):
+    def __init__(self, data_mediator, tabs, treemap, grid_view, line_view):
         self.data_mediator = data_mediator
+        self.tabs = tabs
         self.treemap = treemap
         self.grid_view = grid_view
         self.line_view = line_view
@@ -38,3 +39,8 @@ class VisMediator():
     def on_grid_view_click(self, cell_name):
         fig = self.line_view.generate_plot()
         self.line_view.create_lineview(fig)
+    
+    def on_tab_click(self, current_tab):
+        grid_size = self.data_mediator.get_grid_size(current_tab)
+        self.grid_view.set_grid_size(grid_size)
+        self.grid_view.create_grid_view()

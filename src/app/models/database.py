@@ -10,6 +10,7 @@ class SQLiteDB():
         self.prefix = self._get_db_prefix(file_path) # takes input data file path
         self._connect_to_db()
         self._create_tables()
+        self._insert_cells()
 
     def _connect_to_db(self):
         db_name = f'{self.db_directory}/{self.prefix}.db'
@@ -66,3 +67,22 @@ class SQLiteDB():
             sanitised = 't_' + sanitised
 
         return sanitised
+    
+    def _insert_cells(self):
+        for header in self.data_processor.get_headers():
+            sanitised = self.sanitise(header)
+            cell_table = f'{sanitised}_cell_table'
+            cell_ids, cell_id_starts, cell_id_ends, signal_ids = self.data_processor.get_cells_data(header)
+            for cell_id, cell_id_start, cell_id_end, signal_id in zip(cell_ids, cell_id_starts, cell_id_ends, signal_ids):
+                try:
+                    self.cursor.execute(f'''
+                    INSERT INTO {cell_table} (cell_id, cell_id_start, cell_id_end, signal_id)
+                    VALUES ('{cell_id}', {cell_id_start}, {cell_id_end}, '{signal_id}')
+                    ''')
+                    self.conn.commit()
+                except sqlite3.IntegrityError:
+                    print(f"Skipping insert for {cell_id} as it violates unique constraint")
+
+    def close(self):
+        self.cursor.close()
+        self.conn.close()

@@ -38,7 +38,7 @@ class MainWindow(tk.Frame):
         #grid_view
         self.grid_frame = tk.Frame(self.top)
         self.top.add(self.grid_frame, stretch='always')
-        self.grid_view = GridView(self.grid_frame, grid_size=90) #TODO change to take input grid size from data_mediator
+        self.grid_view = GridView(self.grid_frame)
         self.grid_view.pack(fill='both', expand=True)
 
         #treemap
@@ -58,7 +58,10 @@ class MainWindow(tk.Frame):
 
         #vis mediator
         #TODO Change the vis mediator to work with tabs
-        vis_mediator = VisMediator(self.data_mediator ,self.treemap, self.grid_view, self.line_view)
+        vis_mediator = VisMediator(self.data_mediator, self.tabs, self.treemap, self.grid_view, self.line_view)
+        self.tabs.set_vis_mediator(vis_mediator)
         self.treemap.set_vis_mediator(vis_mediator)
         self.grid_view.set_vis_mediator(vis_mediator)
+
+        
 

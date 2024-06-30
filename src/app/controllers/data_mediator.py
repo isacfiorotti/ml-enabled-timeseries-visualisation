@@ -5,10 +5,12 @@ class DataMediator():
     """ The data mediator class object is to be used as a way to cache the data that is to be displayed to prevent repeated queries and store the logic for 
     accessing the database
     """
-    def __init__(self, data_processor):
+    def __init__(self, file_path, database, data_processor):
         self.nodes, self.node_count, self.sequence, self.signals = self._load_from_database()
+        self.db = database
+        self.file_path = file_path
         self.data_processor = data_processor
-
+        self.current_tab = ''
     
     def _load_from_database(self):
         # Test functionality not actual implementation of _load_from_database
@@ -72,3 +74,11 @@ class DataMediator():
         headers = self.data_processor.get_headers()
         return headers
     
+    def get_grid_size(self, current_tab):
+        sanitised = self.db.sanitise(current_tab)
+        cursor = self.db.cursor.execute(f'SELECT COUNT(*) FROM {sanitised}_cell_table')
+        grid_size = cursor.fetchone()[0]
+        return grid_size
+
+    
+
