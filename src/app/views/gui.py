@@ -3,6 +3,8 @@ from app.views.lineview import LineView
 from app.views.treemap import TreemapView
 from app.views.gridview import GridView
 from app.views.tabs import Tabs
+from app.views.add_icon import AddIcon
+from app.views.settings_icon import SettingsIcon
 from app.controllers.vis_mediator import VisMediator
 
 
@@ -21,10 +23,21 @@ class MainWindow(tk.Frame):
         self.window.pack(fill='both', expand=True)
 
         #horizontal tab
-        self.tab_frame = tk.Frame(self.window, background='darkblue', height=20) # tab height
+        self.tab_frame = tk.Frame(self.window, background='#ECECEC', height=20) # tab height
         self.tab_frame.pack(fill='x')
+
+        #plus icon
+        self.add_icon = AddIcon(self.tab_frame)
+        self.add_icon.pack(side='left')
+
+        #settings icon
+        self.add_icon = SettingsIcon(self.tab_frame)
+        self.add_icon.pack(side='right')
+
+        #tabs
         self.tabs = Tabs(self.tab_frame, self.data_mediator)
         self.tabs.pack(fill='both', expand=True)
+
 
         #vertical_paned_window
         self.vertical_paned_window = tk.PanedWindow(self.window, orient='vertical')

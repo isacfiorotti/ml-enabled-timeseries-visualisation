@@ -3,12 +3,13 @@ import tkinter as tk
 class Tabs(tk.Frame):
     def __init__(self, parent, data_mediator, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
+        
+        self.parent = parent
         self.data_mediator = data_mediator
         self.canvas = tk.Canvas(self, height=23) # height needs to be consistent with initiation in gui.py
         self.canvas.pack(fill='both', expand=True)
         self.tabs = {}
         self.create_data_tabs(self.data_mediator.get_headers())
-        self.current_tab = None
 
     def on_resize(self):
         #TODO Change tab width based on window width
@@ -38,10 +39,10 @@ class Tabs(tk.Frame):
 
         return self.canvas.create_polygon(points, **kwargs, smooth=True)
 
-    def create_data_tabs(self, headers):
+    def create_data_tabs(self, headers, color='#DCDCDC'):
         rect_width = 120
         rect_height = 20
-        x_start = 5
+        x_start = 3
         y_start = 5
 
         num_rectangles = len(headers)
@@ -58,8 +59,8 @@ class Tabs(tk.Frame):
                 x2,  # x2 position
                 y2,  # y2 position
                 radius=10,  # Radius for rounded corners
-                fill='#DCDCDC',  # Fill color for rectangles
-                outline='#DCDCDC'  # Outline color for rectangles
+                fill=color,  # Fill color for rectangles
+                outline=color  # Outline color for rectangles
             )
 
             text_x = (x1 + x2) / 2
@@ -78,7 +79,6 @@ class Tabs(tk.Frame):
             self.canvas.tag_bind(text, '<Button-1>', lambda e, tab=headers[i]: self.on_click(tab))
     
     def on_click(self, tab):
-        self.current_tab = tab
         self.vis_mediator.on_tab_click(tab)
 
     def set_vis_mediator(self, vis_mediator):
