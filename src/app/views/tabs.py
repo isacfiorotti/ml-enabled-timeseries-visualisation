@@ -80,6 +80,13 @@ class Tabs(tk.Frame):
             self.canvas.tag_bind(text, '<Button-1>', lambda e, tab=headers[i]: self.on_click(tab))
     
     def on_click(self, tab):
+        self.set_current_tab_color(tab)
+        self.vis_mediator.on_tab_click(tab)
+
+    def set_vis_mediator(self, vis_mediator):
+        self.vis_mediator = vis_mediator
+
+    def set_current_tab_color(self, tab):
         if self.current_tab:
             prev_rect, prev_text = self.tabs[self.current_tab]
             self.canvas.itemconfig(prev_rect, fill='#DCDCDC', outline='#DCDCDC')
@@ -87,11 +94,7 @@ class Tabs(tk.Frame):
 
         self.current_tab = tab
         rect, text = self.tabs[tab]
-        
-        self.canvas.itemconfig(rect, fill='#A9A9A9', outline='#A9A9A9')  # Light blue color
+
+        self.canvas.itemconfig(rect, fill='#A9A9A9', outline='#A9A9A9')
         self.canvas.itemconfig(text, fill='#F0F0F0')
         
-        self.vis_mediator.on_tab_click(tab)
-
-    def set_vis_mediator(self, vis_mediator):
-        self.vis_mediator = vis_mediator
