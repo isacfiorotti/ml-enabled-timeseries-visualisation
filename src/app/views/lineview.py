@@ -17,12 +17,6 @@ class LineView(tk.Frame):
         self.canvas_fig.draw()
         self.canvas_fig.get_tk_widget().pack(fill=tk.BOTH, expand=True)
 
-        #toolbar
-        self.toolbar_frame = tk.Frame(self)  # Frame for the toolbar
-        self.toolbar_frame.pack(side=tk.BOTTOM, fill=tk.X)
-        self.toolbar = NavigationToolbar2Tk(self.canvas_fig, self.toolbar_frame)
-        self.toolbar.update()
-
     def generate_plot(self, data):
 
         x, y = data.iloc[:, 0], data.iloc[:, 1]
@@ -67,10 +61,6 @@ class LineView(tk.Frame):
         self.canvas_fig = FigureCanvasTkAgg(fig, master=self.canvas_frame)
         self.canvas_fig.draw()
         self.canvas_fig.get_tk_widget().pack(fill=tk.BOTH, expand=True)
-        
-        self.toolbar.destroy() 
-        self.toolbar = NavigationToolbar2Tk(self.canvas_fig, self.toolbar_frame)
-        self.toolbar.update()
 
         
 
