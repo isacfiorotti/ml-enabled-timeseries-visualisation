@@ -25,6 +25,9 @@ class LineView(tk.Frame):
         x = x[:1000]
         y = y[:1000]
 
+        x = x[::5]
+        y = y[::5]
+
         fig = plt.Figure(figsize=(5, 4), dpi=100, facecolor='#D3D3D3')
 
         ax = fig.add_subplot(111)

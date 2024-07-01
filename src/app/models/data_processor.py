@@ -7,7 +7,7 @@ from app.models.matrix_profile import MatrixProfile
 class DataProcessor():
     def __init__(self, file_path):
         self.file_path = file_path
-        self.chunk_size = 100000 # change to get this from config
+        self.chunk_size = 25000 # change to get this from config
         self._generate_metadata()
         self.matrix_profile = MatrixProfile()
 
