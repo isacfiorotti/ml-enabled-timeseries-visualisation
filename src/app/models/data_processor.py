@@ -22,7 +22,9 @@ class DataProcessor():
         return data
 
     def get_cells_data(self, header):
-        """Function to input data for cells in db. The function should check metadata to see which files have already been parsed into the db."""
+        """Function to input data for cells in db. The function should check metadata
+            to see which files have already been parsed into the db.
+        """
         chunks = self._read_data()
         cell_ids = []
         cell_id_starts = []
