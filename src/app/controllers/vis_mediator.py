@@ -15,7 +15,6 @@ class VisMediator():
             if self.treemap.nodes[node] == self.toggled_nodes[node]:
                 del self.toggled_nodes[node]
             self.treemap.nodes[node]['toggle'] = False
-        
 
     def on_treemap_enter(self, node, color):
         self.grid_view.create_grid_view()

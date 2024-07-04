@@ -7,7 +7,7 @@ from app.models.matrix_profile import MatrixProfile
 class DataProcessor():
     def __init__(self, file_path):
         self.file_path = file_path
-        self.chunk_size = 100000 # change to get this from config
+        self.chunk_size = 25000 # change to get this from config
         self._generate_metadata()
         self.matrix_profile = MatrixProfile()
 
@@ -22,7 +22,9 @@ class DataProcessor():
         return data
 
     def get_cells_data(self, header):
-        """Function to input data for cells in db. The function should check metadata to see which files have already been parsed into the db."""
+        """Function to input data for cells in db. The function should check metadata
+            to see which files have already been parsed into the db.
+        """
         chunks = self._read_data()
         cell_ids = []
         cell_id_starts = []
