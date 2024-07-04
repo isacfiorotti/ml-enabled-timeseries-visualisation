@@ -38,7 +38,6 @@ class MainWindow(tk.Frame):
         self.tabs = Tabs(self.tab_frame, self.data_mediator)
         self.tabs.pack(fill='both', expand=True)
 
-
         #vertical_paned_window
         self.vertical_paned_window = tk.PanedWindow(self.window, orient='vertical')
         self.vertical_paned_window.pack(fill='both', expand=True)
@@ -70,7 +69,6 @@ class MainWindow(tk.Frame):
         self.line_view.pack(fill='both', expand=True)
 
         #vis mediator
-        #TODO Change the vis mediator to work with tabs
         vis_mediator = VisMediator(self.data_mediator, self.tabs, self.treemap, self.grid_view, self.line_view)
         self.tabs.set_vis_mediator(vis_mediator)
         self.treemap.set_vis_mediator(vis_mediator)
