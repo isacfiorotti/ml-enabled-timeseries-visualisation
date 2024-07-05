@@ -9,8 +9,16 @@ class SQLiteDB():
         self.db_directory = os.path.dirname(file_path)
         self.prefix = self._get_db_prefix(file_path) # takes input data file path
         self._connect_to_db()
-        self._create_tables()
-        self._insert_cells()
+        if not self._check_for_existing_db():
+            self._create_tables()
+            self._insert_cells()
+            self._insert_data()
+
+    def _check_for_existing_db(self):
+        #TODO consider cases where there are multiple files in the directory
+        '''Check if the database already exists. If it does return True.'''
+        if os.path.exists(f'{self.db_directory}/{self.prefix}.db'):
+            return True
 
     def _connect_to_db(self):
         db_name = f'{self.db_directory}/{self.prefix}.db'
@@ -22,6 +30,7 @@ class SQLiteDB():
 
     def _create_tables(self):
         #TODO create func that tells user there is an error creating tables if they have not created a Time(s) in the first col
+        #TODO split each table creation into a separate function
         
         headers = self.data_processor.get_headers()
 
@@ -57,6 +66,8 @@ class SQLiteDB():
                 FOREIGN KEY (signal_id) REFERENCES {self.signal_table}(signal_id)
             )''')
 
+            self._create_data_tables()
+
             self.conn.commit()
     
     #TODO Possibly move this function to data_processor for better readablitiy
@@ -79,9 +90,42 @@ class SQLiteDB():
                     INSERT INTO {cell_table} (cell_id, cell_id_start, cell_id_end, signal_id)
                     VALUES ('{cell_id}', {cell_id_start}, {cell_id_end}, '{signal_id}')
                     ''')
+
                     self.conn.commit()
                 except sqlite3.IntegrityError:
                     print(f"Skipping insert for {cell_id} as it violates unique constraint")
+
+    def _create_data_tables(self):
+        for header in self.data_processor.get_headers():
+            header = self.sanitise(header)
+            self.cursor.execute(f'''CREATE TABLE IF NOT EXISTS {header}_data_table (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                time FLOAT,
+                value FLOAT
+            )''')
+
+    def _insert_data(self):
+        for header in self.data_processor.get_headers():
+            sanitised = self.sanitise(header)
+            data = self.data_processor.read_data()
+            time = data['Time(s)']
+            values = data[header]
+            data_table = f'{sanitised}_data_table'
+            
+            # Prepare the data for batch insertion
+            batch_data = [(t, v) for t, v in zip(time, values)]
+            
+            try:
+                self.cursor.executemany(f'''
+                INSERT INTO {data_table} (time, value)
+                VALUES (?, ?)
+                ''', batch_data)
+                self.conn.commit()
+            except sqlite3.IntegrityError as e:
+                print(f"An integrity error occurred: {e}. Skipping problematic entries.")
+
+    def get_data_in_cell(self, cell_id):
+        pass
 
     def close(self):
         self.cursor.close()

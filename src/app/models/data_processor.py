@@ -59,3 +59,7 @@ class DataProcessor():
         headers.insert(0, 'Time(s)')
         data.columns = headers
         return data
+
+    def read_data(self):
+        data = pd.read_csv(self.file_path)
+        return data
