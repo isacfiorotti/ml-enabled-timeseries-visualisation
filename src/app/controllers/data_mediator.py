@@ -107,7 +107,6 @@ class DataMediator():
         rows = cursor2.fetchall()
 
         data = pd.DataFrame(rows, columns=['id', 'time', 'value'])
-        print(data.head())
 
         return data
 
