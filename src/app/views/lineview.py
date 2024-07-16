@@ -19,6 +19,9 @@ class LineView(tk.Frame):
 
     def generate_plot(self, data):
 
+        #drop first col
+        data = data.drop(data.columns[0], axis=1)
+
         x, y = data.iloc[:, 0], data.iloc[:, 1]
         
         # downsample

@@ -10,7 +10,7 @@ def main():
     root.geometry('800x600')
 
     data_processor = DataProcessor(FILE_PATH) 
-    #TODO database should be created dynamically based on files which are in the data directory
+
     #TODO add function that checks for the data folder and checks if there are already files
     db = SQLiteDB(FILE_PATH, data_processor)
 

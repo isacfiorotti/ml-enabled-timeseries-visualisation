@@ -84,12 +84,30 @@ class DataMediator():
         self.current_tab = current_tab
 
     def get_cell_data(self, cell_id):
-        """ Returns the data for a cell
-        """
+        """ Returns the data for a cell """
         sanitised = self.db.sanitise(self.current_tab)
-        cursor = self.db.cursor.execute(f'SELECT * FROM {sanitised}_cell_table WHERE cell_id = ?', (cell_id,))
-        query = cursor.fetchone()
-        data = self.data_processor.read_chunk(query[1], query[2])
-        filtered_data = data[['Time(s)', self.current_tab]]
-        return filtered_data
-    
+
+        query1 = f'''
+        SELECT cell_id_start, cell_id_end FROM {sanitised}_cell_table
+        WHERE cell_id = ?
+        '''
+        cursor1 = self.db.cursor.execute(query1, (cell_id,))
+        result = cursor1.fetchone()
+
+        cell_id_start, cell_id_end = result
+
+        cell_id_start, cell_id_end = int(cell_id_start), int(cell_id_end)
+        print(cell_id_start, cell_id_end)
+
+        query2 = f'''
+        SELECT * FROM {sanitised}_data_table
+        WHERE id >= ? AND id <= ?
+        '''
+        cursor2 = self.db.cursor.execute(query2, (cell_id_start, cell_id_end))
+        rows = cursor2.fetchall()
+
+        data = pd.DataFrame(rows, columns=['id', 'time', 'value'])
+
+        return data
+
+
