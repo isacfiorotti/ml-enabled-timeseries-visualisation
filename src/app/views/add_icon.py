@@ -6,7 +6,7 @@ class AddIcon(tk.Frame):
         super().__init__(parent, *args, **kwargs)
         
         self.parent = parent
-        self.add_icon_path = "/Users/isacfiorotti/Documents/COMP4031 - Personal Project/ml-enabled-timeseries-visualisation/src/app/assets/add.png"
+        self.add_icon_path = "/Users/isacfiorotti/Documents/COMP4031 - Personal Project/timeseries-visualisation-software/src/app/assets/add.png"
         self.add_icon_pil = Image.open(self.add_icon_path)
         
         # Calculate the aspect ratio
