@@ -9,10 +9,10 @@ class SQLiteDB():
         self.db_directory = os.path.dirname(file_path)
         self.prefix = self._get_db_prefix(file_path) # takes input data file path
         self._connect_to_db()
-        # if not self._check_for_existing_db():
-        self._create_tables()
-        self._insert_cells()
-        self._insert_data()
+        if not self._check_for_existing_db():
+            self._create_tables()
+            self._insert_cells()
+            self._insert_data()
 
     def _check_for_existing_db(self):
         #TODO consider cases where there are multiple files in the directory
