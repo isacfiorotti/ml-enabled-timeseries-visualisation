@@ -3,11 +3,12 @@ import pandas as pd
 import dask.dataframe as dd
 import os
 from app.models.matrix_profile import MatrixProfile
+from app.config import CHUNK_SIZE
 
 class DataProcessor():
     def __init__(self, file_path):
         self.file_path = file_path
-        self.chunk_size = 25000 # change to get this from config
+        self.chunk_size = CHUNK_SIZE
         self._generate_metadata()
         self.matrix_profile = MatrixProfile()
 
