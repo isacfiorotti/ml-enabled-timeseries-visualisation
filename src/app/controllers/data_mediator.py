@@ -97,7 +97,6 @@ class DataMediator():
         cell_id_start, cell_id_end = result
 
         cell_id_start, cell_id_end = int(cell_id_start), int(cell_id_end)
-        print(cell_id_start, cell_id_end)
 
         query2 = f'''
         SELECT * FROM {sanitised}_data_table
