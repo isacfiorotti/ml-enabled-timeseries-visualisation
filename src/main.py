@@ -4,10 +4,12 @@ from app.controllers.data_mediator import DataMediator
 from app.models.database import SQLiteDB
 from app.models.data_processor import DataProcessor
 from app.config import FILE_PATH
+from app.config import WINDOW_TITLE
 
 def main():
     root = tk.Tk()
     root.geometry('800x600')
+    root.title(WINDOW_TITLE)
 
     data_processor = DataProcessor(FILE_PATH) 
 
