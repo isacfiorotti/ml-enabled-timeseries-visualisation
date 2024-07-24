@@ -39,9 +39,21 @@ class VisMediator():
         data = self.data_mediator.get_cell_data(cell_id)
         fig = self.line_view.generate_plot(data)
         self.line_view.create_lineview(fig)
+        
     
     def on_tab_click(self, current_tab):
         self.data_mediator._set_current_tab(current_tab)
         grid_size = self.data_mediator.get_grid_size()
         self.grid_view.set_grid_size(grid_size)
         self.grid_view.create_grid_view()
+
+        # on tab click we need to start the subthread to calculate the matrix profile so we can create the treemap
+
+        # first check if the matrix profile has already been calculated
+
+        # if it has been calculated then we can just create the treemap
+
+        # if it hasn't been calculated then we need to start the subthread to calculate the matrix profile
+
+        # once a mp for a cell has been calculated we need to store it in the database and update the treemap
+
