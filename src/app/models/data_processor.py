@@ -2,7 +2,6 @@
 import pandas as pd
 import dask.dataframe as dd
 import os
-from app.models.matrix_profile import MatrixProfile
 from app.config import CHUNK_SIZE
 
 class DataProcessor():
@@ -10,7 +9,6 @@ class DataProcessor():
         self.file_path = file_path
         self.chunk_size = CHUNK_SIZE
         self._generate_metadata()
-        self.matrix_profile = MatrixProfile()
 
     def get_headers(self):
         """Returns the headers of the data file without Time (s)"""
@@ -64,3 +62,4 @@ class DataProcessor():
     def read_data(self):
         data = pd.read_csv(self.file_path)
         return data
+    
