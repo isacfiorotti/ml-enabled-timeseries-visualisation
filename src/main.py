@@ -5,6 +5,8 @@ from app.models.database import SQLiteDB
 from app.models.data_processor import DataProcessor
 from app.config import FILE_PATH
 from app.config import WINDOW_TITLE
+from app.models.matrix_profile_model import MatrixProfile
+import threading
 
 def main():
     root = tk.Tk()
@@ -13,10 +15,16 @@ def main():
 
     data_processor = DataProcessor(FILE_PATH) 
 
+    matrix_profile_model = MatrixProfile(100, 0.9, 0.01, 80, 5)
+
     #TODO add function that checks for the data folder and checks if there are already files
     db = SQLiteDB(FILE_PATH, data_processor)
+    data_mediator = DataMediator(FILE_PATH, db, data_processor, matrix_profile_model)
 
-    data_mediator = DataMediator(FILE_PATH, db, data_processor)
+    # Start a background thread for the matrix profile model operations
+    matrix_profile_thread = threading.Thread(target=data_mediator.run_matrix_profile_operations)
+    matrix_profile_thread.daemon = True  # Daemonize thread to ensure it exits when the main program exits
+    matrix_profile_thread.start()
 
     app = MainWindow(root, data_mediator)
     app.pack(fill='both', expand=True)
