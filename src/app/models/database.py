@@ -8,10 +8,10 @@ class SQLiteDB():
         self.db_directory = os.path.dirname(file_path)
         self.prefix = self._get_db_prefix(file_path)  # Takes input data file path
         self._connect_to_db()
-        if not self._check_for_existing_db():
-            self._create_tables()
-            self._insert_cells()
-            self._insert_data()
+        # if not self._check_for_existing_db():
+        self._create_tables()
+        self._insert_cells()
+        self._insert_data()
 
     def _check_for_existing_db(self):
         '''Check if the database already exists. If it does, return True.'''
@@ -37,19 +37,16 @@ class SQLiteDB():
             # Node table
             self.cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS {self.node_table} (
-                node_id VARCHAR(255) PRIMARY KEY,
-                signals_in_node TEXT,
-                signal_count INT
+                node_id INTEGER PRIMARY KEY,
+                signal_ids_in_node TEXT
             )''')
 
             # Signal table
             self.cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS {self.signal_table} (
-                signal_id VARCHAR(255) PRIMARY KEY,
-                signal_start FLOAT,
-                signal_end FLOAT,
-                node_id VARCHAR(255),
-                FOREIGN KEY (node_id) REFERENCES {self.node_table}(node_id)
+                signal_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                signal_idxs TEXT,
+                cell_id TEXT
             )''')
 
             # Cell table
@@ -57,9 +54,7 @@ class SQLiteDB():
             CREATE TABLE IF NOT EXISTS {self.cell_table} (
                 cell_id VARCHAR(255) PRIMARY KEY,
                 cell_id_start FLOAT,
-                cell_id_end FLOAT,
-                signal_id VARCHAR(255),
-                FOREIGN KEY (signal_id) REFERENCES {self.signal_table}(signal_id)
+                cell_id_end FLOAT
             )''')
 
             self._create_data_tables()
@@ -75,13 +70,13 @@ class SQLiteDB():
         for header in self.data_processor.get_headers():
             sanitised = self.sanitise(header)
             cell_table = f'{sanitised}_cell_table'
-            cell_ids, cell_id_starts, cell_id_ends, signal_ids = self.data_processor.get_cells_data(header)
-            for cell_id, cell_id_start, cell_id_end, signal_id in zip(cell_ids, cell_id_starts, cell_id_ends, signal_ids):
+            cell_ids, cell_id_starts, cell_id_ends = self.data_processor.get_cells_data(header)
+            for cell_id, cell_id_start, cell_id_end in zip(cell_ids, cell_id_starts, cell_id_ends):
                 try:
                     self.cursor.execute(f'''
-                    INSERT INTO {cell_table} (cell_id, cell_id_start, cell_id_end, signal_id)
-                    VALUES (?, ?, ?, ?)
-                    ''', (cell_id, cell_id_start, cell_id_end, signal_id))
+                    INSERT INTO {cell_table} (cell_id, cell_id_start, cell_id_end)
+                    VALUES (?, ?, ?)
+                    ''', (cell_id, cell_id_start, cell_id_end))
                     self.conn.commit()
                 except sqlite3.IntegrityError:
                     print(f"Skipping insert for cell {cell_id} as it violates unique constraint")
@@ -91,8 +86,8 @@ class SQLiteDB():
             header = self.sanitise(header)
             self.cursor.execute(f'''CREATE TABLE IF NOT EXISTS {header}_data_table (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                time FLOAT,
-                value FLOAT
+                Time_s_ FLOAT,
+                {header} FLOAT
             )''')
 
     def _insert_data(self):
@@ -105,7 +100,7 @@ class SQLiteDB():
             batch_data = [(t, v) for t, v in zip(time, values)]
             try:
                 self.cursor.executemany(f'''
-                INSERT INTO {data_table} (time, value)
+                INSERT INTO {data_table} (Time_s_, {sanitised})
                 VALUES (?, ?)
                 ''', batch_data)
                 self.conn.commit()
@@ -123,3 +118,44 @@ class SQLiteDB():
         conn = sqlite3.connect(f'{self.db_directory}/{self.prefix}.db')
         cursor = conn.cursor()
         return conn, cursor
+
+    def insert_signal_data(self, signal_id, signal_idxs, cell_id, current_tab, cursor, conn):
+        signal_table = f'{self.sanitise(current_tab)}_signal_table'
+        try:
+            cursor.execute(f'''
+            INSERT INTO {signal_table} (signal_id, signal_idxs, cell_id)
+            VALUES (?, ?, ?)
+            ''', (signal_id, signal_idxs, cell_id))
+            conn.commit()
+
+        except sqlite3.IntegrityError:
+            print(f"Skipping insert for signal {signal_id} as it violates unique constraint")
+
+    def insert_node_data(self, node_id, signal_ids_in_node, current_tab, cursor, conn):
+        node_table = f'{self.sanitise(current_tab)}_node_table'
+        print('Inserting node data...')
+
+        # Check if the node already exists
+        cursor.execute(f'''
+        SELECT signal_ids_in_node FROM {node_table} WHERE node_id = ?
+        ''', (node_id,))
+        row = cursor.fetchone()
+
+        if row:
+            # Node exists, update it with new signals
+            existing_signal_ids = set(row[0].split(','))
+            new_signal_ids = set(signal_ids_in_node.split(','))
+            updated_signal_ids = ','.join(existing_signal_ids.union(new_signal_ids))
+            cursor.execute(f'''
+            UPDATE {node_table}
+            SET signal_ids_in_node = ?
+            WHERE node_id = ?
+            ''', (updated_signal_ids, node_id))
+        else:
+            # Node does not exist, insert new node
+            cursor.execute(f'''
+            INSERT INTO {node_table} (node_id, signal_ids_in_node)
+            VALUES (?, ?)
+            ''', (node_id, signal_ids_in_node))
+
+        conn.commit()

@@ -28,15 +28,13 @@ class DataProcessor():
         cell_ids = []
         cell_id_starts = []
         cell_id_ends = []
-        signal_ids = []
 
         for i, chunk in enumerate(chunks):
             cell_ids.append(f"cell_{i}")
             cell_id_starts.append(chunk.index[0])
             cell_id_ends.append(chunk.index[-1])
-            signal_ids.append('signal1') # change to get signal ids from matrix profile
 
-        return cell_ids, cell_id_starts, cell_id_ends, signal_ids
+        return cell_ids, cell_id_starts, cell_id_ends, 
 
 
     def _generate_metadata(self):
