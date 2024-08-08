@@ -14,8 +14,12 @@ class TreemapView(tk.Frame):
         self.canvas.bind('<Leave>', self.on_leave)
 
     def on_resize(self, event):
+        if self.data_mediator.previous_nodes is not None:
+            self.create_treemap(event)
 
-        #TODO Move this to the create_treemap function to allow for better readability
+    def create_treemap(self, event):
+        self.canvas.delete('all')
+
         node_counts = self.data_mediator.get_node_counts()
         labels = self.data_mediator.get_nodes()
 
@@ -28,11 +32,6 @@ class TreemapView(tk.Frame):
         # Squarify is used to find the optimal arrangement for the treemap.
         norm_node_counts = squarify.normalize_sizes(node_counts, self.width, self.height)
         rects = squarify.squarify(norm_node_counts, 0, 0, self.width, self.height)
-
-        self.create_treemap(rects, labels, colors)
-
-    def create_treemap(self, rects, labels, colors):
-        self.canvas.delete('all')
         
         for rect, label, color in zip(rects, labels, colors):
             x0, y0, x1, y1 = rect['x'], rect['y'], rect['x'] + rect['dx'], rect['y'] + rect['dy']
@@ -60,3 +59,4 @@ class TreemapView(tk.Frame):
 
     def on_leave(self, event):
         self.vis_mediator.on_treemap_leave()
+

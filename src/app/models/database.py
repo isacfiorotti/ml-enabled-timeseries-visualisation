@@ -9,9 +9,9 @@ class SQLiteDB():
         self.prefix = self._get_db_prefix(file_path)  # Takes input data file path
         self._connect_to_db()
         # if not self._check_for_existing_db():
-        self._create_tables()
-        self._insert_cells()
-        self._insert_data()
+        # self._create_tables()
+        # self._insert_cells()
+        # self._insert_data()
 
     def _check_for_existing_db(self):
         '''Check if the database already exists. If it does, return True.'''
@@ -54,7 +54,8 @@ class SQLiteDB():
             CREATE TABLE IF NOT EXISTS {self.cell_table} (
                 cell_id VARCHAR(255) PRIMARY KEY,
                 cell_id_start FLOAT,
-                cell_id_end FLOAT
+                cell_id_end FLOAT,
+                processed BOOLEAN DEFAULT FALSE
             )''')
 
             self._create_data_tables()

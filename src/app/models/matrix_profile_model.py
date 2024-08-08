@@ -25,13 +25,18 @@ class MatrixProfile():
         
         # Prepare time data
         cell_data['Time(s)'] = pd.to_datetime(cell_data['Time(s)'], format='%H:%M:%S.%f')
-        cell_data = cell_data.iloc[self.mp_window_size - 1:].reset_index(drop=True)
-        points = pd.DataFrame({'Time(s)': cell_data['Time(s)'], 'Matrix Profile': matrix_profile[:, 0]})
-        points_filtered = points[points['Matrix Profile'] > self.mp_threshold]
+        
+        # Adjust to align with matrix profile without resetting index
+        start_index = self.mp_window_size - 1
+        adjusted_data = cell_data.iloc[start_index:].copy()
+        adjusted_data['Matrix Profile'] = matrix_profile[:, 0]
+        
+        # Filter significant points
+        points_filtered = adjusted_data[adjusted_data['Matrix Profile'] > self.mp_threshold]
         
         # Calculate gaps and group into blocks
         gaps = points_filtered['Time(s)'].diff()
-        gap_threshold = pd.Timedelta(seconds=0.01)
+        gap_threshold = pd.Timedelta(seconds=0.01) #TODO change this to take in a parameter from congit
         
         blocks = []
         current_block = []
@@ -48,8 +53,9 @@ class MatrixProfile():
         
         # Clear empty blocks and those below the base signal length
         blocks = [block for block in blocks if not block.empty and len(block) >= self.base_signal_length]
-
+        
         return blocks
+
 
     def calculate_signal_nodes(self, signals, cell_data, current_tab):
         """ Calculate the signal nodes for the cell """
