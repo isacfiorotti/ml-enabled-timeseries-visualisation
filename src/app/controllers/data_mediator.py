@@ -10,65 +10,86 @@ class DataMediator():
     accessing the database
     """
     def __init__(self, file_path, database, data_processor, matrix_profile_model):
-        self.nodes, self.node_count, self.sequence, self.signals = self._load_from_database()
         self.db = database
         self.file_path = file_path
         self.data_processor = data_processor
         self.current_tab = None
         self.matrix_profile_model = matrix_profile_model
         self.previous_nodes = None
+        self.nodes, self.node_count, self.sequence, self.signals = None, None, None, None
 
-    def _load_from_database(self):
-        # Test functionality not actual implementation of _load_from_database
-        nodes = {
-            'node_1':[1, 2],
-            'node_2':[3],
-            'node_3':[4],
-            'node_4':[5],
-            'node_5':[6]
-        }
+    def _load_tab_from_database(self):
+        """ Loads the tab from the database """
+        nodes = {}
+        node_count = {}
+        sequence = []
+        signals = {}
 
-        node_count = {
-            'node_1':2,
-            'node_2':1,
-            'node_3':1,
-            'node_4':1,
-            'node_5':1
-        }
+        conn, cursor = self.db.connect()
+        try:
+            header = self.db.sanitise(self.current_tab)
+            node_table = f'{header}_node_table'
+            signal_table = f'{header}_signal_table'
 
-        sequence = {
-            'cell_0':[1],
-            'cell_1':[5],
-            'cell_2':[2],
-            'cell_3':[3],
-            'cell_4':[4]
-        }
+            query1 = f'''
+            SELECT * FROM {node_table}
+            '''
+            cursor.execute(query1)
+            result = cursor.fetchall()
 
-        signals = {
-            1:'cell_0',
-            2:'cell_2',
-            3:'cell_3',
-            4:'cell_4',
-            5:'cell_5',
-            6:'cell_7'
-        }
+            for row in result:
+                node_id, signal_ids = row
+                nodes[node_id] = signal_ids
+                sequence.append(node_id)
+
+            query2 = f'''
+            SELECT * FROM {signal_table}
+            '''
+            cursor.execute(query2)
+            result = cursor.fetchall()
+
+            for row in result:
+                signal_id, signal_idxs, cell_id = row
+                signals[signal_id] = signal_idxs
+
+            #node count is the number of signals in each node
+            query3 = f'''
+            SELECT node_id, signal_ids_in_node FROM {node_table}
+            '''
+            cursor.execute(query3)
+            result = cursor.fetchall()
+            
+            for row in result:
+                node_id, signal_ids_in_node = row
+                signal_ids = signal_ids_in_node.split(',')
+                node_count[node_id] = len(signal_ids)
+
+            node_count = list(node_count.values())
+
+        finally:
+            conn.close()
 
         return nodes, node_count, sequence, signals
 
     def get_signals_in_node(self, node):
         """ Returns dictionary containing signals grouped into nodes 
         """
-        return list(self.nodes[node])
+        signals_in_node = self.nodes[node]
+
+        return signals_in_node
     
     def get_nodes(self):
         """ Returns a list of nodes
         """
-        return list(self.nodes.keys())
+        nodes = self.nodes
+        return nodes
 
     def get_node_counts(self):
         """ Returns list of counts for all nodes
         """
-        return list(self.node_count.values())
+        node_count = self.node_count
+
+        return node_count
 
     def get_signal_cell(self, signal_id, cursor=None):
         """ Returns the cell that the signal is in
@@ -235,8 +256,10 @@ class DataMediator():
 
         return signal_df
 
-    def _get_signals_in_cell(self, cell_id, cursor):
+    def _get_signals_in_cell(self, cell_id, cursor=None):
         """ Returns the signals in a cell """
+        if cursor is None:
+            cursor = self.db.cursor
 
         signal_df = self._create_signal_df(cursor)
         signals_in_cell = signal_df[signal_df['cell_id'] == cell_id]
@@ -256,6 +279,11 @@ class DataMediator():
                         print('Processing cell:', cell_id)
 
                         # add something to check if the cell has already been processed
+                        if self._is_cell_processed(cell_id, cursor):
+                            print('Cell already processed')
+                            self.nodes, self.node_count, self.sequence, self.signals = self._load_tab_from_database()
+                            self.previous_nodes = self.nodes
+                            continue
 
                         signal_blocks, cell_data = self._get_signal_blocks(cell_id, cursor)
                         last_signal_id = self._check_for_signals(cursor)
@@ -265,9 +293,12 @@ class DataMediator():
                             start_time = signal_block['Time(s)'].iloc[0]
                             end_time = signal_block['Time(s)'].iloc[-1]
                             signal_data = cell_data[(cell_data['Time(s)'] >= start_time) & (cell_data['Time(s)'] <= end_time)]
-                            signal_idxs = signal_data.index.tolist()
+                            signal_idxs = list(signal_data['id'])
                             signal_idxs = str(signal_idxs)
                             self.db.insert_signal_data(signal_id + idx, signal_idxs, cell_id, self.current_tab, cursor, conn)
+
+                        self._update_cell_processed(cell_id, cursor, conn)
+                        print('Cell processed')
 
                         last_node_id = self._check_for_nodes(cursor)
                         last_node_id = last_node_id + 1
@@ -294,6 +325,7 @@ class DataMediator():
 
                             # Update the previous nodes
                             self.previous_nodes = nodes
+                            # self.nodes, self.node_count, self.sequence, self.signals = self._load_tab_from_database()
 
                         else:
 
@@ -326,6 +358,7 @@ class DataMediator():
 
                             # Update the previous nodes
                             self.previous_nodes = merged_nodes
+                            # self.nodes, self.node_count, self.sequence, self.signals = self._load_tab_from_database()
 
                         time.sleep(0.01)
 
@@ -335,3 +368,27 @@ class DataMediator():
 
                 finally:
                     conn.close()
+
+    def _is_cell_processed(self, cell_id, cursor):
+        """ Checks if a cell has already been processed """
+        query = f'''
+        SELECT processed FROM {self.db.sanitise(self.current_tab)}_cell_table
+        WHERE cell_id = ?
+        '''
+        cursor.execute(query, (cell_id,))
+        result = cursor.fetchone()
+
+        if result is not None:
+            return result[0]
+        else:
+            return False
+        
+    def _update_cell_processed(self, cell_id, cursor, conn):
+        """ Updates the cell to processed """
+        query = f'''
+        UPDATE {self.db.sanitise(self.current_tab)}_cell_table
+        SET processed = TRUE
+        WHERE cell_id = ?
+        '''
+        cursor.execute(query, (cell_id,))
+        conn.commit()
