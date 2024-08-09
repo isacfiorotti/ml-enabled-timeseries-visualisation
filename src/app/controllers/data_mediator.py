@@ -72,9 +72,11 @@ class DataMediator():
         return nodes, node_count, sequence, signals
 
     def get_signals_in_node(self, node):
-        """ Returns dictionary containing signals grouped into nodes 
-        """
+        """ Returns the signals in a node """
+
         signals_in_node = self.nodes[node]
+        signals_in_node = signals_in_node.split(',')
+        signals_in_node = [int(signal) for signal in signals_in_node]
 
         return signals_in_node
     

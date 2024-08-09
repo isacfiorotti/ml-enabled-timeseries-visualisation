@@ -36,7 +36,7 @@ class MatrixProfile():
         
         # Calculate gaps and group into blocks
         gaps = points_filtered['Time(s)'].diff()
-        gap_threshold = pd.Timedelta(seconds=0.01) #TODO change this to take in a parameter from congit
+        gap_threshold = pd.Timedelta(seconds=0.01) #TODO change this to take in a parameter from config
         
         blocks = []
         current_block = []
