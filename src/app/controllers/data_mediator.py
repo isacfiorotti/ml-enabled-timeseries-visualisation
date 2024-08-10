@@ -165,10 +165,10 @@ class DataMediator():
         try:
             cursor.execute(query)
             result = cursor.fetchone()
-            last_signal_id = result[0] if result[0] is not None else 0
+            last_signal_id = result[0] if result[0] is not None else None
             print('Checking for signals...')
         except sqlite3.OperationalError:
-            last_signal_id = 0
+            last_signal_id = None
 
         return last_signal_id
     
@@ -289,7 +289,7 @@ class DataMediator():
 
                         signal_blocks, cell_data = self._get_signal_blocks(cell_id, cursor)
                         last_signal_id = self._check_for_signals(cursor)
-                        signal_id = last_signal_id + 1
+                        signal_id = 0 if last_signal_id is None else last_signal_id + 1
 
                         for idx, signal_block in enumerate(signal_blocks):
                             start_time = signal_block['Time(s)'].iloc[0]
