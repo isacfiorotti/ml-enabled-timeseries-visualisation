@@ -17,6 +17,7 @@ class DataMediator():
         self.matrix_profile_model = matrix_profile_model
         self.previous_nodes = None
         self.nodes, self.node_count, self.sequence, self.signals = None, None, None, None
+        self.sequence = ['cell_0', 'cell_1', 'cell_2']
 
     def _load_tab_from_database(self):
         """ Loads the tab from the database """
@@ -217,7 +218,7 @@ class DataMediator():
 
         return result
 
-    def _get_signal_data(self, signal_id, cell_id, cursor):
+    def _get_signal_data(self, signal_id, cursor):
         """ Queries the database for the signal data of 1 signal"""
             
         sanitised = self.db.sanitise(self.current_tab)
@@ -225,9 +226,9 @@ class DataMediator():
 
         query = f'''
         SELECT signal_idxs FROM {signal_table}
-        WHERE signal_id = ? AND cell_id = ?
+        WHERE signal_id = ?
         '''
-        cursor.execute(query, (signal_id, cell_id))
+        cursor.execute(query, (signal_id,))
         result = cursor.fetchone()
 
         if result is None:
@@ -269,107 +270,55 @@ class DataMediator():
         return signals_in_cell
 
     def run_matrix_profile_operations(self):
-        test_sequence = ['cell_0', 'cell_1', 'cell_2', 'cell_3', 'cell_4']
-
+        
         while True:
-            if self.current_tab is not None:
-                # Create new connection to database within the thread
-                conn, cursor = self.db.connect()
-                try:
-                    for cell_id in test_sequence: # change to get_cells()
-                        
-                        print('Processing cell:', cell_id)
 
-                        # add something to check if the cell has already been processed
-                        if self._is_cell_processed(cell_id, cursor):
-                            print('Cell already processed')
-                            self.nodes, self.node_count, self.sequence, self.signals = self._load_tab_from_database()
-                            self.previous_nodes = self.nodes
-                            continue
+            if self.current_tab is not None:      
+                conn, cursor = self.db.connect()       
+                for cell_id in self.sequence:
+                    
+                    print('Processing cell:', cell_id)
 
-                        signal_blocks, cell_data = self._get_signal_blocks(cell_id, cursor)
-                        last_signal_id = self._check_for_signals(cursor)
-                        signal_id = 0 if last_signal_id is None else last_signal_id + 1
+                    # add a check to see if the cell has already been processed
 
-                        for idx, signal_block in enumerate(signal_blocks):
-                            start_time = signal_block['Time(s)'].iloc[0]
-                            end_time = signal_block['Time(s)'].iloc[-1]
-                            signal_data = cell_data[(cell_data['Time(s)'] >= start_time) & (cell_data['Time(s)'] <= end_time)]
-                            signal_idxs = list(signal_data['id'])
-                            signal_idxs = str(signal_idxs)
-                            self.db.insert_signal_data(signal_id + idx, signal_idxs, cell_id, self.current_tab, cursor, conn)
+                    # get the cell data and calculate the signals
+                    cell_data = self.get_cell_data(cell_id, cursor)
+                    signals_in_cell = self.matrix_profile_model.calculate_signals(cell_data)
 
+                    # check if the current cell has no signals
+                    if not signals_in_cell:
+                        print('No signals in cell:', cell_id)
                         self._update_cell_processed(cell_id, cursor, conn)
-                        print('Cell processed')
+                        continue
 
-                        last_node_id = self._check_for_nodes(cursor)
-                        last_node_id = last_node_id + 1
+                    else:
+                        # insert the signals into the database
+                        last_signal_id = self._check_for_signals(cursor)
+                        for signal in signals_in_cell:
+                            signal_idxs = str(signal['id'].tolist())   
+                            signal_id = last_signal_id + 1 if last_signal_id is not None else 0
+                            self.db.insert_signal_data(signal_id, signal_idxs, cell_id, self.current_tab, cursor, conn)
+                            last_signal_id = signal_id
 
+                        # calculate the signal nodes if there are no previous nodes
                         if self.previous_nodes is None:
-                            # Create the first set of nodes
-                            signals_in_cell = self._get_signals_in_cell(cell_id, cursor)
-                            signal_ids = list(signals_in_cell['signal_id'])
+                            signals = self._get_signals_in_cell(cell_id, cursor)
                             signal_data = []
-                            for signal_id in signal_ids:
-                                signal = self._get_signal_data(signal_id, cell_id, cursor)
-                                signal_data.append(signal)
-
-                            # Create the nodes
-                            print('Creating nodes...')
-                            nodes = self.matrix_profile_model.calculate_signal_nodes(signal_data, cell_data, self.current_tab)
-
-                            # Insert the nodes into the database
-                            for _, row in nodes.iterrows():
-                                # convert signal_ids_in_node to string
-                                row['signal_id'] = row['signal_id'].astype(str)
-                                print('Inserting node data...')
-                                self.db.insert_node_data(row['node_id'], row['signal_id'], self.current_tab, cursor, conn)
-
-                            # Update the previous nodes
-                            self.previous_nodes = nodes
-                            # self.nodes, self.node_count, self.sequence, self.signals = self._load_tab_from_database()
+                            for signal_id in signals['signal_id']:
+                                signal_data.append(self._get_signal_data(signal_id, cursor))
+                            curr_nodes = self.matrix_profile_model.calculate_signal_nodes(signal_data, self.current_tab)
+                            self.previous_nodes = curr_nodes
 
                         else:
+                            # get the previous nodes and the signals in them
 
-                            test_sequence = ['cell_0', 'cell_1', 'cell_2', 'cell_3', 'cell_4']
-                            signals_in_previous_nodes = []  # Placeholder for fetched signal data
-                            
-                            # Query the database for all signals in previous nodes
-                            for cell_id in test_sequence:
-                                signals_in_cell = self._get_signals_in_cell(cell_id, cursor)
-                                signal_ids = list(signals_in_cell['signal_id'])
-                                signals_in_previous_nodes.extend(signal_ids)
+                            # get the current signals found and then attempt to merge them with the previous nodes, if they are not merged then add them as new nodes
+                            pass
 
-                            # Create signal_data variable for all signals in previous nodes
-                            signal_data = []
-                            for signal_id in signals_in_previous_nodes:
-                                signal_cell_id = self.get_signal_cell(signal_id, cursor)
-                                signal = self._get_signal_data(signal_id, signal_cell_id, cursor)
-                                signal_data.append(signal)
+                print('All cells processed')
+                break
 
-                            # Merge the previous nodes with the current nodes
-                            print('Merging nodes...')
-                            current_nodes = self.matrix_profile_model.calculate_signal_nodes(signal_data, cell_data, self.current_tab)
-                            merged_nodes = self.matrix_profile_model.merge_nodes(self.previous_nodes, current_nodes, signal_data, self.current_tab)
-
-                            # Insert the merged nodes into the database
-                            for _, row in merged_nodes.iterrows():
-                                # convert signal_ids_in_node to string
-                                row['signal_id'] = str(row['signal_id'])
-                                self.db.insert_node_data(row['node_id'], row['signal_id'], self.current_tab, cursor, conn)
-
-                            # Update the previous nodes
-                            self.previous_nodes = merged_nodes
-                            # self.nodes, self.node_count, self.sequence, self.signals = self._load_tab_from_database()
-
-                        time.sleep(0.01)
-
-                    # break once all cells have been processed
-                    print('All cells processed')
-                    break
-
-                finally:
-                    conn.close()
+        return None
 
     def _is_cell_processed(self, cell_id, cursor):
         """ Checks if a cell has already been processed """
@@ -386,6 +335,7 @@ class DataMediator():
             return False
         
     def _update_cell_processed(self, cell_id, cursor, conn):
+
         """ Updates the cell to processed """
         query = f'''
         UPDATE {self.db.sanitise(self.current_tab)}_cell_table
