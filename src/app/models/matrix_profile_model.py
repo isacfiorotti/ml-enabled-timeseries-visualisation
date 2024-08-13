@@ -59,6 +59,7 @@ class MatrixProfile():
 
     def calculate_signal_nodes(self, signals, current_tab, last_signal_id=None):
         """ Calculate the signal nodes for the cell """
+        #TODO Rework this function to take into account the merging sensitivity
         
         sleep_time = 0.01
         signal_mass_scores = []
@@ -66,7 +67,7 @@ class MatrixProfile():
         # Compute pairwise distances using STUMPY mass, signals is a list of dataframes
         for i in range(len(signals)):
             for j in range(i + 1, len(signals)):
-                # Extract the 'Arterial pressure (mmHg)' column values
+                
                 signal_i = signals[i][current_tab].values
                 signal_j = signals[j][current_tab].values
 
@@ -123,16 +124,47 @@ class MatrixProfile():
 
         if last_signal_id is not None:
             result_df['signal_id'] += last_signal_id + 1
-
-        print(result_df)
         
         return result_df
 
 
-    def merge_nodes(self, previous_nodes, current_nodes, prev_signal_data, curr_signal_data, current_tab):
+    def merge_nodes(self, previous_nodes, prev_signal_data, curr_signal_data, current_tab):
         """ Merge the previous nodes with the current nodes """
+
+        result_df = previous_nodes.copy()
+        last_node_id = previous_nodes['node_id'].max()
+        last_signal_id = previous_nodes['signal_id'].max()
+
+        for node in previous_nodes['node_id'].unique():
+            # select the first signal in the node
+            representative_signal = prev_signal_data[0]
+            signal_id = last_signal_id + 1
+
+            for signal in curr_signal_data:
+                
+                signal_i = representative_signal[current_tab].values
+                signal_j = signal[current_tab].values
+
+                # Pad the shorter signal with zeros to make them the same length
+                if len(signal_i) > len(signal_j):
+                    signal_j = np.pad(signal_j, (0, len(signal_i) - len(signal_j)), 'constant')
+                else:
+                    signal_i = np.pad(signal_i, (0, len(signal_j) - len(signal_i)), 'constant')
+
+                # Compute distance using STUMPY mass
+                distance = stumpy.mass(signal_i, signal_j).mean()
+
+                # If there is a match, merge the signals
+                if distance < self.mp_merging_sensitivity:
+                    # Merge the signals by inserting into dataframe
+                    new_row = pd.DataFrame({'node_id': [node], 'signal_id': [signal_id]})
+                    result_df = pd.concat([result_df, new_row], ignore_index=True)
+                    print(f'Merged signal {signal_id} into node {node}')
+                
+                signal_id += 1
+                    
 
         # merged_result_df = pd.DataFrame({'node_id': node_id, 'signal_id': signal_ids_in_node})
         # print(merged_result_df)
         
-        pass
+        return result_df

@@ -307,19 +307,26 @@ class DataMediator():
                             for signal_id in signals['signal_id']:
                                 signal_data.append(self._get_signal_data(signal_id, cursor))
                             curr_nodes = self.matrix_profile_model.calculate_signal_nodes(signal_data, self.current_tab)
+                            #TODO insert the nodes into the database
+
                             self.previous_nodes = curr_nodes
 
                         else:
                             # get the previous nodes and the signals in them
-
+                            prev_signal_data = []
+                            for prev_signal in self.previous_nodes['signal_id']:
+                                prev_signal_data.append(self._get_signal_data(prev_signal, cursor))
+                            
+                        
                             # get the current signals found and then attempt to merge them with the previous nodes, if they are not merged then add them as new nodes
-                            pass
+                            curr_signal_data = signals_in_cell
+                            merged_nodes = self.matrix_profile_model.merge_nodes(self.previous_nodes, prev_signal_data, curr_signal_data, self.current_tab)
+                            #TODO insert the nodes into the database 
 
                 print('All cells processed')
                 break
 
         return None
-
     def _is_cell_processed(self, cell_id, cursor):
         """ Checks if a cell has already been processed """
         query = f'''
