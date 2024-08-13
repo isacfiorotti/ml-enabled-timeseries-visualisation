@@ -327,6 +327,7 @@ class DataMediator():
                 break
 
         return None
+    
     def _is_cell_processed(self, cell_id, cursor):
         """ Checks if a cell has already been processed """
         query = f'''

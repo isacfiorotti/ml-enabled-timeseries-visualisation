@@ -56,20 +56,17 @@ class MatrixProfile():
         
         return signals
 
-
-    def calculate_signal_nodes(self, signals, current_tab, last_signal_id=None):
+    def calculate_signal_nodes(self, signal_data, current_tab, last_signal_id=None):
         """ Calculate the signal nodes for the cell """
-        #TODO Rework this function to take into account the merging sensitivity
-        
-        sleep_time = 0.01
-        signal_mass_scores = []
+        # Initialize variables
+        signal_mass_scores = {}
+        signal_nodes = pd.DataFrame(columns=['node_id', 'signal_id'])
 
-        # Compute pairwise distances using STUMPY mass, signals is a list of dataframes
-        for i in range(len(signals)):
-            for j in range(i + 1, len(signals)):
-                
-                signal_i = signals[i][current_tab].values
-                signal_j = signals[j][current_tab].values
+        # Calculate pairwise distances and store in signal_mass_scores
+        for i in range(len(signal_data)):
+            for j in range(i + 1, len(signal_data)):
+                signal_i = signal_data[i][current_tab].values
+                signal_j = signal_data[j][current_tab].values
 
                 # Pad the shorter signal with zeros to make them the same length
                 if len(signal_i) > len(signal_j):
@@ -78,55 +75,41 @@ class MatrixProfile():
                     signal_i = np.pad(signal_i, (0, len(signal_j) - len(signal_i)), 'constant')
 
                 # Compute distance using STUMPY mass
-                distance = stumpy.mass(signal_i, signal_j).mean()
-                signal_mass_scores.append((i, j, distance))
-        
-        # Sort by distance
-        signal_mass_scores.sort(key=lambda x: x[2])
+                distance = stumpy.mass(signal_i, signal_j)
 
-        # Ensure that the signals are not assigned to multiple groups
-        groups = []
-        assigned_signals = set()
+                # If there is a match, store the match in signal_mass_scores
+                if distance < self.mp_merging_sensitivity:
+                    signal_mass_scores[(i, j)] = distance
 
-        # Build groups based on sorted similarity scores
-        for i, j, distance in signal_mass_scores:
-            if i not in assigned_signals and j not in assigned_signals:
-                groups.append([i, j])
-                assigned_signals.add(i)
-                assigned_signals.add(j)
-            elif i not in assigned_signals:
-                for group in groups:
-                    if j in group:
-                        group.append(i)
-                        assigned_signals.add(i)
-                        break
-            elif j not in assigned_signals:
-                for group in groups:
-                    if i in group:
-                        group.append(j)
-                        assigned_signals.add(j)
-                        break
-        
-        # Include any unassigned signals as their own groups
-        for i in range(len(signals)):
-            if i not in assigned_signals:
-                groups.append([i])
+        # Assign signals to nodes based on signal_mass_scores
+        node_id = 0
+        signal_to_node = {}
 
-        # Create the output DataFrame
-        node_id = []
-        signal_ids_in_node = []
-        for node_idx, group in enumerate(groups):
-            for signal_id in group:
-                node_id.append(node_idx)
-                signal_ids_in_node.append(signal_id)
+        for i in range(len(signal_data)):
+            # Check if the signal is already assigned to a node
+            assigned_node = None
 
-        result_df = pd.DataFrame({'node_id': node_id, 'signal_id': signal_ids_in_node})
+            for (sig_i, sig_j), dist in signal_mass_scores.items():
+                if i == sig_i or i == sig_j:
+                    if sig_i in signal_to_node:
+                        assigned_node = signal_to_node[sig_i]
+                    elif sig_j in signal_to_node:
+                        assigned_node = signal_to_node[sig_j]
+                    break
 
-        if last_signal_id is not None:
-            result_df['signal_id'] += last_signal_id + 1
-        
-        return result_df
+            # If the signal has a match, assign it to the same node as its match
+            if assigned_node is not None:
+                signal_to_node[i] = assigned_node
+            else:
+                # Otherwise, create a new node
+                signal_to_node[i] = node_id
+                node_id += 1
 
+            # Add the signal to the DataFrame
+            new_row = pd.DataFrame({'node_id': [signal_to_node[i]], 'signal_id': [i]})
+            signal_nodes = pd.concat([signal_nodes, new_row], ignore_index=True)
+
+        return signal_nodes
 
     def merge_nodes(self, previous_nodes, prev_signal_data, curr_signal_data, current_tab):
         """ Merge the previous nodes with the current nodes """
@@ -163,7 +146,6 @@ class MatrixProfile():
                 
                 signal_id += 1
                     
-
         # merged_result_df = pd.DataFrame({'node_id': node_id, 'signal_id': signal_ids_in_node})
         # print(merged_result_df)
         
