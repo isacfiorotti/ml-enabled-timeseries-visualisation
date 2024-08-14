@@ -132,31 +132,19 @@ class SQLiteDB():
         except sqlite3.IntegrityError:
             print(f"Skipping insert for signal {signal_id} as it violates unique constraint")
 
-    def insert_node_data(self, node_id, signal_ids_in_node, current_tab, cursor, conn):
+    def insert_node_data(self, node_data, current_tab, cursor, conn):
         node_table = f'{self.sanitise(current_tab)}_node_table'
         print('Inserting node data...')
 
-        # Check if the node already exists
-        cursor.execute(f'''
-        SELECT signal_ids_in_node FROM {node_table} WHERE node_id = ?
-        ''', (node_id,))
-        row = cursor.fetchone()
+        for node_id, signal_id in node_data:
+            try:
+                cursor.execute(f'''
+                INSERT INTO {node_table} (node_id, signal_id)
+                VALUES (?, ?)
+                ''', (node_id, signal_id))
+                conn.commit()
 
-        if row:
-            # Node exists, update it with new signals
-            existing_signal_ids = set(row[0].split(','))
-            new_signal_ids = set(signal_ids_in_node.split(','))
-            updated_signal_ids = ','.join(existing_signal_ids.union(new_signal_ids))
-            cursor.execute(f'''
-            UPDATE {node_table}
-            SET signal_ids_in_node = ?
-            WHERE node_id = ?
-            ''', (updated_signal_ids, node_id))
-        else:
-            # Node does not exist, insert new node
-            cursor.execute(f'''
-            INSERT INTO {node_table} (node_id, signal_ids_in_node)
-            VALUES (?, ?)
-            ''', (node_id, signal_ids_in_node))
-
-        conn.commit()
+            except sqlite3.IntegrityError:
+                print(f"Skipping insert for node {node_id} as it violates unique constraint")
+        
+        
