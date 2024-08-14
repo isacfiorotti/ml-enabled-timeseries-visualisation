@@ -135,7 +135,7 @@ class MatrixProfile():
                     signal_i = np.pad(signal_i, (0, len(signal_j) - len(signal_i)), 'constant')
 
                 # Compute distance using STUMPY mass
-                distance = stumpy.mass(signal_i, signal_j).mean()
+                distance = stumpy.mass(signal_i, signal_j)
 
                 # If there is a match, merge the signals
                 if distance < self.mp_merging_sensitivity:
