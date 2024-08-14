@@ -38,7 +38,7 @@ class SQLiteDB():
             self.cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS {self.node_table} (
                 node_id INTEGER PRIMARY KEY,
-                signal_ids_in_node TEXT
+                signald_id INTEGER,
             )''')
 
             # Signal table
