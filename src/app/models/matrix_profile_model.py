@@ -115,16 +115,31 @@ class MatrixProfile():
         """ Merge the previous nodes with the current nodes """
 
         result_df = previous_nodes.copy()
+
         last_node_id = previous_nodes['node_id'].max()
         last_signal_id = previous_nodes['signal_id'].max()
 
-        for node in previous_nodes['node_id'].unique():
-            # select the first signal in the node
-            representative_signal = prev_signal_data[0]
-            signal_id = last_signal_id + 1
+        # Assign signal IDs to the new signals by creating a dictionary
+        signal_id_dict = {}
+        current_signal_id = last_signal_id
 
-            for signal in curr_signal_data:
-                
+        for idx, signal_df in enumerate(curr_signal_data):
+            current_signal_id += 1
+            signal_id_dict[idx] = current_signal_id
+            signal_df['signal_id'] = current_signal_id
+
+        matched_signals = set()
+
+        # Iterate through each node in previous_nodes
+        for node in previous_nodes['node_id'].unique():
+            # Select the first signal in the node
+            representative_signal = prev_signal_data[0]
+
+            for idx, signal in enumerate(curr_signal_data):
+
+                if idx in matched_signals:
+                    continue  # Skip if already matched
+
                 signal_i = representative_signal[current_tab].values
                 signal_j = signal[current_tab].values
 
@@ -139,14 +154,25 @@ class MatrixProfile():
 
                 # If there is a match, merge the signals
                 if distance < self.mp_merging_sensitivity:
-                    # Merge the signals by inserting into dataframe
+                    # Get the signal ID from the dictionary using the current index
+                    signal_id = signal_id_dict[idx]
+                    
+                    # Merge the signals by inserting into the DataFrame
                     new_row = pd.DataFrame({'node_id': [node], 'signal_id': [signal_id]})
                     result_df = pd.concat([result_df, new_row], ignore_index=True)
                     print(f'Merged signal {signal_id} into node {node}')
-                
-                signal_id += 1
+                    matched_signals.add(idx)  # Mark signal as matched
                     
-        # merged_result_df = pd.DataFrame({'node_id': node_id, 'signal_id': signal_ids_in_node})
-        # print(merged_result_df)
-        
+        # If no match is found, create a new node for each signal not already in a node
+        node_id = last_node_id + 1
+        for idx, signal in enumerate(curr_signal_data):
+            # Get the signal ID from the dictionary using the current index
+            signal_id = signal_id_dict[idx]
+            
+            if signal_id not in result_df['signal_id'].values:
+                new_row = pd.DataFrame({'node_id': [node_id], 'signal_id': [signal_id]})
+                result_df = pd.concat([result_df, new_row], ignore_index=True)
+                print(f'Created new node {node_id} for signal {signal_id}')
+                node_id += 1
+
         return result_df
