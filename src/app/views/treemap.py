@@ -20,8 +20,7 @@ class TreemapView(tk.Frame):
     def create_treemap(self, event):
         self.canvas.delete('all')
 
-        node_counts = self.data_mediator.get_node_counts()
-        labels = self.data_mediator.get_nodes()
+        node_counts, labels = self.data_mediator.get_node_count_and_labels()
 
         colors = ["#E74C3C", "#3498DB", "#27AE60", "#9B59B6", "#E67E22"] # Modern high-contrast palette for light grey background
 

@@ -21,58 +21,40 @@ class DataMediator():
 
     def _load_tab_from_database(self):
         """ Loads the tab from the database """
-        nodes = {}
-        node_count = {}
-        sequence = []
-        signals = {}
+        pass
 
-        conn, cursor = self.db.connect()
-        try:
-            header = self.db.sanitise(self.current_tab)
-            node_table = f'{header}_node_table'
-            signal_table = f'{header}_signal_table'
+    def _load_nodes(self):
+        """ Calculates the node counts """
+        query = f'''
+        SELECT node_id, COUNT(signal_id) FROM {self.db.sanitise(self.current_tab)}_node_table
+        '''
+        cursor = self.db.cursor
+        cursor.execute(query)
+        result = cursor.fetchall()
 
-            query1 = f'''
-            SELECT * FROM {node_table}
-            '''
-            cursor.execute(query1)
-            result = cursor.fetchall()
+        nodes = pd.DataFrame(result, columns=['node_id', 'count'])
 
-            for row in result:
-                node_id, signal_ids = row
-                nodes[node_id] = signal_ids
-                sequence.append(node_id)
+        return nodes
 
-            query2 = f'''
-            SELECT * FROM {signal_table}
-            '''
-            cursor.execute(query2)
-            result = cursor.fetchall()
+    def get_node_count_and_labels(self):
+        """ Calculate the node counts and returns a list of the number of signals in each node """
+        query = f'''
+        SELECT node_id, COUNT(signal_id) FROM {self.db.sanitise(self.current_tab)}_node_table
+        GROUP BY node_id
+        '''
+        cursor = self.db.cursor
+        cursor.execute(query)
+        result = cursor.fetchall()
+        
+        nodes = pd.DataFrame(result, columns=['node_id', 'count'])
+        count = nodes['count'].tolist()
+        labels = nodes['node_id'].tolist()
 
-            for row in result:
-                signal_id, signal_idxs, cell_id = row
-                signals[signal_id] = signal_idxs
+        return count, labels
 
-            #node count is the number of signals in each node
-            query3 = f'''
-            SELECT node_id, signal_ids_in_node FROM {node_table}
-            '''
-            cursor.execute(query3)
-            result = cursor.fetchall()
-            
-            for row in result:
-                node_id, signal_ids_in_node = row
-                signal_ids = signal_ids_in_node.split(',')
-                node_count[node_id] = len(signal_ids)
-
-            node_count = list(node_count.values())
-
-        finally:
-            conn.close()
-
-        return nodes, node_count, sequence, signals
 
     def get_signals_in_node(self, node):
+        # TODO FIX THIS
         """ Returns the signals in a node """
 
         signals_in_node = self.nodes[node]
@@ -81,18 +63,6 @@ class DataMediator():
 
         return signals_in_node
     
-    def get_nodes(self):
-        """ Returns a list of nodes
-        """
-        nodes = self.nodes
-        return nodes
-
-    def get_node_counts(self):
-        """ Returns list of counts for all nodes
-        """
-        node_count = self.node_count
-
-        return node_count
 
     def get_signal_cell(self, signal_id, cursor=None):
         """ Returns the cell that the signal is in
@@ -279,7 +249,12 @@ class DataMediator():
                     
                     print('Processing cell:', cell_id)
 
-                    # add a check to see if the cell has already been processed
+                    # check if the cell has already been processed
+                    if self._is_cell_processed(cell_id, cursor):
+                        print('Cell already processed:', cell_id)
+                        # query for previous nodes
+                        self.previous_nodes = self._get_previous_nodes(cursor, conn)
+                        continue
 
                     # get the cell data and calculate the signals
                     cell_data = self.get_cell_data(cell_id, cursor)
@@ -302,14 +277,19 @@ class DataMediator():
 
                         # calculate the signal nodes if there are no previous nodes
                         if self.previous_nodes is None:
+                            # Query the node tabele to see if there are any nodes
                             signals = self._get_signals_in_cell(cell_id, cursor)
                             signal_data = []
                             for signal_id in signals['signal_id']:
                                 signal_data.append(self._get_signal_data(signal_id, cursor))
+                            
                             curr_nodes = self.matrix_profile_model.calculate_signal_nodes(signal_data, self.current_tab)
                             #TODO insert the nodes into the database
-
+                            
+                            self.db.insert_node_data(curr_nodes, self.current_tab, cursor, conn)
+                            
                             self.previous_nodes = curr_nodes
+                            self._update_cell_processed(cell_id, cursor, conn)
 
                         else:
                             # get the previous nodes and the signals in them
@@ -317,11 +297,15 @@ class DataMediator():
                             for prev_signal in self.previous_nodes['signal_id']:
                                 prev_signal_data.append(self._get_signal_data(prev_signal, cursor))
                             
-                        
                             # get the current signals found and then attempt to merge them with the previous nodes, if they are not merged then add them as new nodes
                             curr_signal_data = signals_in_cell
                             merged_nodes = self.matrix_profile_model.merge_nodes(self.previous_nodes, prev_signal_data, curr_signal_data, self.current_tab)
-                            #TODO insert the nodes into the database 
+                            #TODO insert the nodes into the database
+                            self.db.insert_node_data(merged_nodes, self.current_tab, cursor, conn)
+                            
+                            self.previous_nodes = merged_nodes
+                            self._update_cell_processed(cell_id, cursor, conn)
+
 
                 print('All cells processed')
                 break
@@ -352,3 +336,16 @@ class DataMediator():
         '''
         cursor.execute(query, (cell_id,))
         conn.commit()
+
+    def _get_previous_nodes(self, cursor, conn):
+        """ Returns the previous nodes """
+        query = f'''
+        SELECT * FROM {self.db.sanitise(self.current_tab)}_node_table
+        '''
+        cursor.execute(query)
+
+        result = cursor.fetchall()
+
+        previous_nodes = pd.DataFrame(result, columns=['node_id', 'signal_id'])
+        
+        return previous_nodes
