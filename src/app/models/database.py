@@ -37,8 +37,8 @@ class SQLiteDB():
             # Node table
             self.cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS {self.node_table} (
-                node_id INTEGER PRIMARY KEY,
-                signald_id INTEGER,
+                node_id INTEGER,
+                signal_id INTEGER UNIQUE
             )''')
 
             # Signal table
@@ -136,15 +136,19 @@ class SQLiteDB():
         node_table = f'{self.sanitise(current_tab)}_node_table'
         print('Inserting node data...')
 
-        for node_id, signal_id in node_data:
+        for _, row in node_data.iterrows():
+            node_id = row['node_id']
+            signal_id = row['signal_id']
             try:
                 cursor.execute(f'''
                 INSERT INTO {node_table} (node_id, signal_id)
                 VALUES (?, ?)
                 ''', (node_id, signal_id))
                 conn.commit()
-
+            
             except sqlite3.IntegrityError:
-                print(f"Skipping insert for node {node_id} as it violates unique constraint")
+                print(f"Skipping insert for node {signal_id} as it violates unique constraint")
+            
+
         
         
