@@ -12,6 +12,7 @@ class TreemapView(tk.Frame):
         self.canvas.pack(fill='both', expand=True)
         self.bind('<Configure>', self.on_resize)
         self.canvas.bind('<Leave>', self.on_leave)
+        self.colors = ["#E74C3C", "#3498DB", "#27AE60", "#9B59B6", "#E67E22"] # Modern high-contrast palette for light grey background
 
     def on_resize(self, event):
         if self.data_mediator.previous_nodes is not None:
@@ -22,7 +23,7 @@ class TreemapView(tk.Frame):
 
         node_counts, labels = self.data_mediator.get_node_count_and_labels()
 
-        colors = ["#E74C3C", "#3498DB", "#27AE60", "#9B59B6", "#E67E22"] # Modern high-contrast palette for light grey background
+        colors = [self.colors[i % len(self.colors)] for i in range(len(labels))]
 
         self.width = event.width
         self.height = event.height

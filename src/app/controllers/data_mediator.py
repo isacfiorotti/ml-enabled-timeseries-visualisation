@@ -52,18 +52,13 @@ class DataMediator():
 
         return count, labels
 
-
     def get_signals_in_node(self, node):
-        # TODO FIX THIS
         """ Returns the signals in a node """
-
-        signals_in_node = self.nodes[node]
-        signals_in_node = signals_in_node.split(',')
-        signals_in_node = [int(signal) for signal in signals_in_node]
+        signals_in_node = self.previous_nodes[self.previous_nodes['node_id'] == node]
+        signals_in_node = signals_in_node['signal_id'].tolist()
 
         return signals_in_node
     
-
     def get_signal_cell(self, signal_id, cursor=None):
         """ Returns the cell that the signal is in
         """
@@ -284,8 +279,6 @@ class DataMediator():
                                 signal_data.append(self._get_signal_data(signal_id, cursor))
                             
                             curr_nodes = self.matrix_profile_model.calculate_signal_nodes(signal_data, self.current_tab)
-                            #TODO insert the nodes into the database
-                            
                             self.db.insert_node_data(curr_nodes, self.current_tab, cursor, conn)
                             
                             self.previous_nodes = curr_nodes
@@ -300,7 +293,6 @@ class DataMediator():
                             # get the current signals found and then attempt to merge them with the previous nodes, if they are not merged then add them as new nodes
                             curr_signal_data = signals_in_cell
                             merged_nodes = self.matrix_profile_model.merge_nodes(self.previous_nodes, prev_signal_data, curr_signal_data, self.current_tab)
-                            #TODO insert the nodes into the database
                             self.db.insert_node_data(merged_nodes, self.current_tab, cursor, conn)
                             
                             self.previous_nodes = merged_nodes
