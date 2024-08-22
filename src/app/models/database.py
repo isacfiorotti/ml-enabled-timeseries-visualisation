@@ -8,7 +8,7 @@ class SQLiteDB():
         self.db_directory = os.path.dirname(file_path)
         self.prefix = self._get_db_prefix(file_path)  # Takes input data file path
         self._connect_to_db()
-        # if not self._check_for_existing_db():
+        # if not self._check_for_existing_db( , need to make the cheks more sophisticated
         # self._create_tables()
         # self._insert_cells()
         # self._insert_data()
@@ -37,8 +37,8 @@ class SQLiteDB():
             # Node table
             self.cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS {self.node_table} (
-                node_id INTEGER PRIMARY KEY,
-                signal_ids_in_node TEXT
+                node_id INTEGER,
+                signal_id INTEGER UNIQUE
             )''')
 
             # Signal table
@@ -132,31 +132,23 @@ class SQLiteDB():
         except sqlite3.IntegrityError:
             print(f"Skipping insert for signal {signal_id} as it violates unique constraint")
 
-    def insert_node_data(self, node_id, signal_ids_in_node, current_tab, cursor, conn):
+    def insert_node_data(self, node_data, current_tab, cursor, conn):
         node_table = f'{self.sanitise(current_tab)}_node_table'
         print('Inserting node data...')
 
-        # Check if the node already exists
-        cursor.execute(f'''
-        SELECT signal_ids_in_node FROM {node_table} WHERE node_id = ?
-        ''', (node_id,))
-        row = cursor.fetchone()
+        for _, row in node_data.iterrows():
+            node_id = row['node_id']
+            signal_id = row['signal_id']
+            try:
+                cursor.execute(f'''
+                INSERT INTO {node_table} (node_id, signal_id)
+                VALUES (?, ?)
+                ''', (node_id, signal_id))
+                conn.commit()
+            
+            except sqlite3.IntegrityError:
+                print(f"Skipping insert for node {signal_id} as it violates unique constraint")
+            
 
-        if row:
-            # Node exists, update it with new signals
-            existing_signal_ids = set(row[0].split(','))
-            new_signal_ids = set(signal_ids_in_node.split(','))
-            updated_signal_ids = ','.join(existing_signal_ids.union(new_signal_ids))
-            cursor.execute(f'''
-            UPDATE {node_table}
-            SET signal_ids_in_node = ?
-            WHERE node_id = ?
-            ''', (updated_signal_ids, node_id))
-        else:
-            # Node does not exist, insert new node
-            cursor.execute(f'''
-            INSERT INTO {node_table} (node_id, signal_ids_in_node)
-            VALUES (?, ?)
-            ''', (node_id, signal_ids_in_node))
-
-        conn.commit()
+        
+        
