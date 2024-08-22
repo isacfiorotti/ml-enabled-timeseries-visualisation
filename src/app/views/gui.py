@@ -6,6 +6,9 @@ from app.views.tabs import Tabs
 from app.views.add_icon import AddIcon
 from app.views.settings_icon import SettingsIcon
 from app.controllers.vis_mediator import VisMediator
+from app.views.gridview_tab_top import GridviewTabTop
+from app.views.gridview_axis_x import GridAxisX
+from app.views.gridview_axis_y import GridAxisY
 
 
 class MainWindow(tk.Frame):
@@ -45,13 +48,23 @@ class MainWindow(tk.Frame):
         #top frame
         self.top = tk.PanedWindow(self.window, orient='horizontal') # Top frame is a paned window for dividing left and right
         self.top.pack(fill='both', expand=True)
-        self.vertical_paned_window.add(self.top, stretch='always')
+        self.vertical_paned_window.add(self.top, stretch='always', minsize=300)
 
         #grid_view
         self.grid_frame = tk.Frame(self.top)
         self.top.add(self.grid_frame, stretch='always')
+        
+        self.gridview_tab_top = GridviewTabTop(self.grid_frame)
+        self.gridview_tab_top.pack(fill='x', expand=False)
+
+        self.gridview_axis_y = GridAxisY(self.grid_frame)
+        self.gridview_axis_y.pack(fill='y', expand=False, side='left')
+        
         self.grid_view = GridView(self.grid_frame)
         self.grid_view.pack(fill='both', expand=True)
+
+        self.gridview_axis_x = GridAxisX(self.grid_frame)
+        self.gridview_axis_x.pack(fill='x', expand=False)
 
         #treemap
         self.treemap_frame = tk.Frame(self.top)

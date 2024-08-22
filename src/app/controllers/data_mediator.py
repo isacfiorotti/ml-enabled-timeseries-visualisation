@@ -350,3 +350,20 @@ class DataMediator():
         cells = [str(cell[0]) for cell in result]
 
         return cells
+    
+    def get_processed_cells(self, cursor=None):
+        """ Returns all the cells which have been processed """
+        if cursor is None:
+            cursor = self.db.cursor
+        
+        query = f'''
+        SELECT cell_id FROM {self.db.sanitise(self.current_tab)}_cell_table
+        where processed = TRUE
+        '''
+
+        cursor.execute(query)
+        result = cursor.fetchall()
+        
+        cells = [str(cell[0]) for cell in result]
+
+        return cells
