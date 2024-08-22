@@ -46,6 +46,7 @@ class TreemapView(tk.Frame):
             self.canvas.tag_bind(node_id, '<Button-1>', lambda event, label=label: self.on_click(event, label))
             self.canvas.tag_bind(text, '<Button-1>', lambda event, label=label: self.on_click(event, label))
             self.canvas.tag_bind(node_id, '<Enter>', lambda event, label=label: self.on_enter(event, label))
+            self.canvas.tag_bind(text, '<Enter>', lambda event, label=label: self.on_enter(event, label))
 
     def set_vis_mediator(self, vis_mediator):
         self.vis_mediator = vis_mediator
