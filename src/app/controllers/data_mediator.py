@@ -16,12 +16,7 @@ class DataMediator():
         self.current_tab = None
         self.matrix_profile_model = matrix_profile_model
         self.previous_nodes = None
-        self.nodes, self.node_count, self.sequence, self.signals = None, None, None, None
-        self.sequence = ['cell_0', 'cell_1', 'cell_2']
-
-    def _load_tab_from_database(self):
-        """ Loads the tab from the database """
-        pass
+        self.sequence = None
 
     def _load_nodes(self):
         """ Calculates the node counts """
@@ -239,7 +234,8 @@ class DataMediator():
         while True:
 
             if self.current_tab is not None:      
-                conn, cursor = self.db.connect()       
+                conn, cursor = self.db.connect()
+                self.sequence = self._get_all_cells(cursor)     
                 for cell_id in self.sequence:
                     
                     print('Processing cell:', cell_id)
@@ -330,6 +326,7 @@ class DataMediator():
         conn.commit()
 
     def _get_previous_nodes(self, cursor, conn):
+
         """ Returns the previous nodes """
         query = f'''
         SELECT * FROM {self.db.sanitise(self.current_tab)}_node_table
@@ -341,3 +338,15 @@ class DataMediator():
         previous_nodes = pd.DataFrame(result, columns=['node_id', 'signal_id'])
         
         return previous_nodes
+
+    def _get_all_cells(self, cursor):
+        """ Returns all the cell ids as a list of strings """
+        query = f'''
+        SELECT cell_id FROM {self.db.sanitise(self.current_tab)}_cell_table
+        '''
+        cursor.execute(query)
+        result = cursor.fetchall()
+
+        cells = [str(cell[0]) for cell in result]
+
+        return cells
