@@ -10,6 +10,8 @@ class GridView(tk.Frame):
         self.grid_size = None  # Start with grid_size as None
         self.padding = 3
         self.canvas.bind("<Configure>", self.on_resize)
+        self.vis_mediator = None
+        self.check_for_processed_cells()
 
     def create_grid(self):
         if self.grid_size is not None:
@@ -46,7 +48,7 @@ class GridView(tk.Frame):
                         y1 = i * (self.cell_height + self.padding) + self.padding
                         x2 = x1 + self.cell_width
                         y2 = y1 + self.cell_height
-                        rect = self.canvas.create_rectangle(x1, y1, x2, y2, fill="#D3D3D3", outline="#D3D3D3")
+                        rect = self.canvas.create_rectangle(x1, y1, x2, y2, fill="#FAF9F6", outline="#FAF9F6")
                         
                         cell_name = f'cell_{cell_count}'
                         self.canvas.tag_bind(rect, "<Button-1>", lambda event, cell_name=cell_name: self.on_click(event, cell_name))
@@ -54,7 +56,8 @@ class GridView(tk.Frame):
                         self.cells[cell_name] = rect
                         cell_count += 1
 
-            self.check_for_toggles()
+            # self.check_for_toggles() #disabled to until fixed way treemaps are created and destroyed
+            self.check_for_clicked_cell()
 
     def set_vis_mediator(self, vis_mediator):
         self.vis_mediator = vis_mediator
@@ -76,4 +79,21 @@ class GridView(tk.Frame):
         self.cell_width = (self.width - (self.cols + 1) * self.padding) / self.cols
         self.cell_height = (self.height - (self.rows + 1) * self.padding) / self.rows
         self.create_grid_view()
+
+    def check_for_processed_cells(self):
+        if self.vis_mediator is not None:
+            self.vis_mediator.color_processed_cells()
+        self.after(1000, self.check_for_processed_cells)
+
+    def check_for_clicked_cell(self):
+        if hasattr(self, 'vis_mediator'):
+            self.vis_mediator.resolve_cell_click()
+
+    def set_cell_clicked(self, cell_name):
+        if cell_name in self.cells:
+            self.canvas.itemconfig(self.cells[cell_name], outline='black')
+
+    def set_cell_unclicked(self, cell_name):
+        if cell_name in self.cells:
+            self.canvas.itemconfig(self.cells[cell_name], outline='#FAF9F6')
 

@@ -6,6 +6,7 @@ class VisMediator():
         self.grid_view = grid_view
         self.line_view = line_view
         self.toggled_nodes = {} # By creating a toggled node dict we can improve efficiency instead of checking for all nodes every time
+        self.clicked_cell = None
 
     def on_treemap_click(self, node, toggle):
         if toggle == False:
@@ -18,6 +19,7 @@ class VisMediator():
 
     def on_treemap_enter(self, node, color):
         self.grid_view.create_grid_view()
+        self.color_processed_cells()
         signals_in_node = self.data_mediator.get_signals_in_node(node)
         for signal in signals_in_node:
             #find which cell that signal is in and color it
@@ -26,6 +28,7 @@ class VisMediator():
 
     def on_treemap_leave(self):
         self.grid_view.create_grid_view()
+        self.color_processed_cells()
         
     def resolve_treemap_toggles(self): # This code is similar to treemap enter consider separating it into different things
         for node in self.toggled_nodes:
@@ -39,6 +42,10 @@ class VisMediator():
         data = self.data_mediator.get_cell_data(cell_id)
         fig = self.line_view.generate_plot(data, cell_id, data)
         self.line_view.create_lineview(fig)
+        if self.clicked_cell is not None:
+            self.grid_view.set_cell_unclicked(self.clicked_cell)
+        self.clicked_cell = cell_id
+        self.grid_view.set_cell_clicked(cell_id)
         
     
     def on_tab_click(self, current_tab):
@@ -55,3 +62,13 @@ class VisMediator():
 
         # once a mp for a cell has been calculated we need to store it in the database and update the treemap
 
+    def color_processed_cells(self):
+        if self.data_mediator.current_tab is not None:
+            processed_cells = self.data_mediator.get_processed_cells()
+            if processed_cells is not None:
+                for cell in processed_cells:
+                    self.grid_view.set_cell_color(cell, '#D3D3D3')
+
+    def resolve_cell_click(self):
+        if self.clicked_cell is not None:
+            self.grid_view.set_cell_clicked(cell_name=self.clicked_cell)
