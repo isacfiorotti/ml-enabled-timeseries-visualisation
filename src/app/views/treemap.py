@@ -13,25 +13,28 @@ class TreemapView(tk.Frame):
         self.bind('<Configure>', self.on_resize)
         self.canvas.bind('<Leave>', self.on_leave)
         self.colors = ["#E74C3C", "#3498DB", "#27AE60", "#9B59B6", "#E67E22"] # Modern high-contrast palette for light grey background
+        self.update_treemap()
 
     def on_resize(self, event):
         if self.data_mediator.previous_nodes is not None:
             self.create_treemap(event)
 
-    def create_treemap(self, event):
+    def create_treemap(self, width=None, height=None):
         self.canvas.delete('all')
 
         node_counts, labels = self.data_mediator.get_node_count_and_labels()
 
         colors = [self.colors[i % len(self.colors)] for i in range(len(labels))]
 
-        self.width = event.width
-        self.height = event.height
-        self.canvas.config(width=self.width, height=self.height)
+        if width is None or height is None:
+            width = self.canvas.winfo_width()
+            height = self.canvas.winfo_height()
+        
+        self.canvas.config(width=width, height=height)
 
         # Squarify is used to find the optimal arrangement for the treemap.
-        norm_node_counts = squarify.normalize_sizes(node_counts, self.width, self.height)
-        rects = squarify.squarify(norm_node_counts, 0, 0, self.width, self.height)
+        norm_node_counts = squarify.normalize_sizes(node_counts, width, height)
+        rects = squarify.squarify(norm_node_counts, 0, 0, width, height)
         
         for rect, label, color in zip(rects, labels, colors):
             x0, y0, x1, y1 = rect['x'], rect['y'], rect['x'] + rect['dx'], rect['y'] + rect['dy']
@@ -42,9 +45,7 @@ class TreemapView(tk.Frame):
 
             self.canvas.tag_bind(node_id, '<Button-1>', lambda event, label=label: self.on_click(event, label))
             self.canvas.tag_bind(text, '<Button-1>', lambda event, label=label: self.on_click(event, label))
-
             self.canvas.tag_bind(node_id, '<Enter>', lambda event, label=label: self.on_enter(event, label))
-    
 
     def set_vis_mediator(self, vis_mediator):
         self.vis_mediator = vis_mediator
@@ -60,3 +61,9 @@ class TreemapView(tk.Frame):
     def on_leave(self, event):
         self.vis_mediator.on_treemap_leave()
 
+    def update_treemap(self):
+        # Check if there's new data to process
+        if self.data_mediator.previous_nodes is not None:
+            self.create_treemap(self.canvas.winfo_width(), self.canvas.winfo_height())
+        # Schedule the next update
+        self.after(1000, self.update_treemap)  # Update every 1000 ms (1 second)
