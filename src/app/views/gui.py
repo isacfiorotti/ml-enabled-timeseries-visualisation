@@ -69,7 +69,7 @@ class MainWindow(tk.Frame):
 
         #treemap
         self.treemap_frame = tk.Frame(self.top)
-        self.top.add(self.treemap_frame, stretch='always', minsize=350)
+        self.top.add(self.treemap_frame, stretch='always', minsize=370)
 
         self.treemap_tab = TreemapTab(self.treemap_frame)
         self.treemap_tab.pack(side='top', fill='x', expand=False)
