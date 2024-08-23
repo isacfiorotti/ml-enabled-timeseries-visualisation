@@ -25,7 +25,7 @@ class GridviewTabTop(tk.Frame):
 
         self.text_id_right = self.canvas_right.create_text(
             0, 0,  # Temporary position
-            text='Currently processing cells...', # change to get cells and total cells
+            text='Status: Currently processing cells...', # change to get cells and total cells
             fill="grey", 
             font=("Helvetica", 10),
             anchor="center"
