@@ -9,6 +9,7 @@ from app.controllers.vis_mediator import VisMediator
 from app.views.gridview_tab_top import GridviewTabTop
 from app.views.gridview_axis_x import GridAxisX
 from app.views.gridview_axis_y import GridAxisY
+from app.views.treemap_tab import TreemapTab
 
 
 class MainWindow(tk.Frame):
@@ -68,7 +69,11 @@ class MainWindow(tk.Frame):
 
         #treemap
         self.treemap_frame = tk.Frame(self.top)
-        self.top.add(self.treemap_frame, stretch='always')
+        self.top.add(self.treemap_frame, stretch='always', minsize=350)
+
+        self.treemap_tab = TreemapTab(self.treemap_frame)
+        self.treemap_tab.pack(side='top', fill='x', expand=False)
+
         self.treemap = TreemapView(self.treemap_frame, self.data_mediator)
         self.treemap.pack(fill='both', expand=True)
         
