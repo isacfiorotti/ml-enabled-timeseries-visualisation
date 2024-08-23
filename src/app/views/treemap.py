@@ -13,13 +13,14 @@ class TreemapView(tk.Frame):
         self.bind('<Configure>', self.on_resize)
         self.canvas.bind('<Leave>', self.on_leave)
         self.colors = ["#E74C3C", "#3498DB", "#27AE60", "#9B59B6", "#E67E22"] # Modern high-contrast palette for light grey background
-        self.update_treemap()
+        # self.update_treemap()
 
     def on_resize(self, event):
         if self.data_mediator.previous_nodes is not None:
             self.create_treemap(event)
 
-    def create_treemap(self, width=None, height=None):
+    def create_treemap(self, width=None, height=None, treemap_tab=None):
+        
         self.canvas.delete('all')
 
         node_counts, labels = self.data_mediator.get_node_count_and_labels()
@@ -62,9 +63,9 @@ class TreemapView(tk.Frame):
     def on_leave(self, event):
         self.vis_mediator.on_treemap_leave()
 
-    def update_treemap(self):
-        # Check if there's new data to process
-        if self.data_mediator.previous_nodes is not None:
-            self.create_treemap(self.canvas.winfo_width(), self.canvas.winfo_height())
-        # Schedule the next update
-        self.after(1000, self.update_treemap)  # Update every 1000 ms (1 second)
+    # def update_treemap(self):
+    #     # Check if there's new data to process
+    #     if self.data_mediator.previous_nodes is not None:
+    #         self.create_treemap(self.canvas.winfo_width(), self.canvas.winfo_height())
+    #     # Schedule the next update
+    #     self.after(1000, self.update_treemap)  # Update every 1000 ms (1 second)
