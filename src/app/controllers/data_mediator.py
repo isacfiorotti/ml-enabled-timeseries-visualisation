@@ -266,33 +266,33 @@ class DataMediator():
                             self.db.insert_signal_data(signal_id, signal_idxs, cell_id, self.current_tab, cursor, conn)
                             last_signal_id = signal_id
 
-                        # calculate the signal nodes if there are no previous nodes
-                        if self.previous_nodes is None:
-                            # Query the node tabele to see if there are any nodes
-                            signals = self._get_signals_in_cell(cell_id, cursor)
-                            signal_data = []
-                            for signal_id in signals['signal_id']:
-                                signal_data.append(self._get_signal_data(signal_id, cursor))
+                        # # calculate the signal nodes if there are no previous nodes
+                        # if self.previous_nodes is None:
+                        #     # Query the node tabele to see if there are any nodes
+                        #     signals = self._get_signals_in_cell(cell_id, cursor)
+                        #     signal_data = []
+                        #     for signal_id in signals['signal_id']:
+                        #         signal_data.append(self._get_signal_data(signal_id, cursor))
                             
-                            curr_nodes = self.matrix_profile_model.calculate_signal_nodes(signal_data, self.current_tab)
-                            self.db.insert_node_data(curr_nodes, self.current_tab, cursor, conn)
+                        #     curr_nodes = self.matrix_profile_model.calculate_signal_nodes(signal_data, self.current_tab)
+                        #     self.db.insert_node_data(curr_nodes, self.current_tab, cursor, conn)
                             
-                            self.previous_nodes = curr_nodes
-                            self._update_cell_processed(cell_id, cursor, conn)
+                        #     self.previous_nodes = curr_nodes
+                        #     self._update_cell_processed(cell_id, cursor, conn)
 
-                        else:
-                            # get the previous nodes and the signals in them
-                            prev_signal_data = []
-                            for prev_signal in self.previous_nodes['signal_id']:
-                                prev_signal_data.append(self._get_signal_data(prev_signal, cursor))
+                        # else:
+                        #     # get the previous nodes and the signals in them
+                        #     prev_signal_data = []
+                        #     for prev_signal in self.previous_nodes['signal_id']:
+                        #         prev_signal_data.append(self._get_signal_data(prev_signal, cursor))
                             
-                            # get the current signals found and then attempt to merge them with the previous nodes, if they are not merged then add them as new nodes
-                            curr_signal_data = signals_in_cell
-                            merged_nodes = self.matrix_profile_model.merge_nodes(self.previous_nodes, prev_signal_data, curr_signal_data, self.current_tab)
-                            self.db.insert_node_data(merged_nodes, self.current_tab, cursor, conn)
+                        #     # get the current signals found and then attempt to merge them with the previous nodes, if they are not merged then add them as new nodes
+                        #     curr_signal_data = signals_in_cell
+                        #     merged_nodes = self.matrix_profile_model.merge_nodes(self.previous_nodes, prev_signal_data, curr_signal_data, self.current_tab)
+                        #     self.db.insert_node_data(merged_nodes, self.current_tab, cursor, conn)
                             
-                            self.previous_nodes = merged_nodes
-                            self._update_cell_processed(cell_id, cursor, conn)
+                        #     self.previous_nodes = merged_nodes
+                        #     self._update_cell_processed(cell_id, cursor, conn)
 
 
                 print('All cells processed')
