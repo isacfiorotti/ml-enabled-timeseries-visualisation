@@ -41,6 +41,9 @@ class LineView(tk.Frame):
         self.fig.patch.set_facecolor('#f0f0f0')
         self.fig.subplots_adjust(bottom=0.2)
 
+        self.ax.set_ylabel(self.data_mediator.current_tab)
+        self.ax.set_xlabel('Time')
+
         # Plot main line
         self.line, = self.ax.plot(self.data_x[:self.display_count], self.data_y[:self.display_count], lw=0.5, color='#053B50')
 
@@ -97,7 +100,7 @@ class LineView(tk.Frame):
 
     def initialize_sliders(self):
         # Slider for changing the start index
-        self.ax_slider_index = plt.axes([0.1, 0.1, 0.8, 0.02], facecolor='lightgoldenrodyellow')
+        self.ax_slider_index = plt.axes([0.1, 0.06, 0.8, 0.02], facecolor='lightgoldenrodyellow')
         self.slider_index = Slider(self.ax_slider_index, 'Idx.', 0, len(self.data_x) - self.display_count, valinit=0, valstep=1)
         self.slider_index.label.set_fontsize(6)
         self.slider_index.valtext.set_visible(False)
@@ -106,7 +109,7 @@ class LineView(tk.Frame):
         self.slider_index.poly.set_facecolor('#ADC4CE')
 
         # Slider for changing the display count
-        self.ax_slider_display_count = plt.axes([0.1, 0.05, 0.8, 0.02], facecolor='lightgoldenrodyellow')
+        self.ax_slider_display_count = plt.axes([0.1, 0.02, 0.8, 0.02], facecolor='lightgoldenrodyellow')
         self.slider_display_count = Slider(self.ax_slider_display_count, 'Freq.', 100, len(self.data_x), valinit=self.display_count, valstep=100)
         self.slider_display_count.label.set_fontsize(6)
         self.slider_display_count.valtext.set_visible(False)
