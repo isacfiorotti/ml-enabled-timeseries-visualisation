@@ -10,12 +10,12 @@ import threading
 
 def main():
     root = tk.Tk()
-    root.geometry('800x600')
+    root.geometry('1024x768')
     root.title(WINDOW_TITLE)
 
     data_processor = DataProcessor(FILE_PATH) 
 
-    matrix_profile_model = MatrixProfile(100, 2, 0.01, 80, 14)
+    matrix_profile_model = MatrixProfile(100, 3, 0.01, 80, 15)
 
     #TODO add function that checks for the data folder and checks if there are already files
     db = SQLiteDB(FILE_PATH, data_processor)
