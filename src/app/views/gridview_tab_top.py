@@ -17,7 +17,7 @@ class GridviewTabTop(tk.Frame):
 
         self.text_id_left = self.canvas_left.create_text(
             0, 0,  # Temporary position
-            text='GridView          Bin Size: 25,000', # change to get binsize
+            text='Time Grid with Binned Intervals      Bin Size: 25,000', # change to get binsize
             fill="grey", 
             font=("Helvetica", 10),
             anchor="center"
