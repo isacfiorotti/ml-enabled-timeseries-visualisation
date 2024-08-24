@@ -1,5 +1,5 @@
 class VisMediator():
-    def __init__(self, data_mediator, tabs, treemap, grid_view, line_view, treemap_tab):
+    def __init__(self, data_mediator, tabs, treemap, grid_view, line_view, treemap_tab, treemap_legend):
         self.data_mediator = data_mediator
         self.tabs = tabs
         self.treemap = treemap
@@ -8,6 +8,9 @@ class VisMediator():
         self.toggled_nodes = {} # By creating a toggled node dict we can improve efficiency instead of checking for all nodes every time
         self.clicked_cell = None
         self.treemap_tab = treemap_tab
+        self.treemap_legend = treemap_legend
+        self.colors = ["#E74C3C", "#3498DB", "#27AE60", "#9B59B6", "#E67E22"] # Modern high-contrast palette for light grey background
+
 
     def on_treemap_click(self, node, toggle):
         if toggle == False:
@@ -90,16 +93,21 @@ class VisMediator():
         # they don't have "nodes" so we need to give them one
         df['count'] = 1
         # send as normal to the 
-        self.treemap.create_treemap(node_counts=df['count'], labels=df['signal_id'])
+        self.treemap.create_treemap(node_counts=df['count'], labels=df['signal_id'], map_colors=self.colors)
 
     def display_by_length(self):
         df = self.data_mediator.run_group_by_length()
         data = df[['node_id', 'count']].drop_duplicates()
 
-        self.treemap.create_treemap(node_counts=data['count'], labels=data['node_id'])
+        self.treemap.create_treemap(node_counts=data['count'], labels=data['node_id'], map_colors=self.colors)
+        self.create_treemap_legend(labels=data['node_id'].tolist())
 
     def display_by_amplitude(self):
         df = self.data_mediator.run_group_by_amplitude()
         data = df[['node_id', 'count']].drop_duplicates()
 
-        self.treemap.create_treemap(node_counts=data['count'], labels=data['node_id']) 
+        self.treemap.create_treemap(node_counts=data['count'], labels=data['node_id'], map_colors=self.colors)
+        self.create_treemap_legend(labels=data['node_id'].tolist())
+
+    def create_treemap_legend(self, labels):
+        self.treemap_legend.draw_legend(colors=self.colors, labels=labels)
