@@ -6,7 +6,7 @@ import time
 import threading
 
 class DataMediator():
-    """ The data mediator class object is to be used as a way to cache the data that is to be displayed to prevent repeated queries and store the logic for 
+    """ The data mediator class object is to be used to store the logic for operations which require
     accessing the database
     """
     def __init__(self, file_path, database, data_processor, matrix_profile_model):
@@ -211,8 +211,11 @@ class DataMediator():
 
         return signal_data
 
-    def _create_signal_df(self, cursor):
+    def _create_signal_df(self, cursor=None):
         """ Creates a dataframe of signals for a tab """
+
+        if cursor == None:
+            cursor = self.db.cursor
 
         signals = self._get_signals(cursor)
         signal_df = pd.DataFrame(signals, columns=['signal_id', 'signal_idxs', 'cell_id'])
@@ -265,6 +268,7 @@ class DataMediator():
                             signal_id = last_signal_id + 1 if last_signal_id is not None else 0
                             self.db.insert_signal_data(signal_id, signal_idxs, cell_id, self.current_tab, cursor, conn)
                             last_signal_id = signal_id
+                        self._update_cell_processed(cell_id, cursor, conn)
 
                         # # calculate the signal nodes if there are no previous nodes
                         # if self.previous_nodes is None:
@@ -352,6 +356,7 @@ class DataMediator():
         return cells
     
     def get_processed_cells(self, cursor=None):
+
         """ Returns all the cells which have been processed """
         if cursor is None:
             cursor = self.db.cursor
@@ -367,3 +372,22 @@ class DataMediator():
         cells = [str(cell[0]) for cell in result]
 
         return cells
+    
+    def run_group_by_length(self):
+        signal_data = self._create_signal_df()
+        df = self.matrix_profile_model.calculate_group_by_length(signal_data)
+        return df
+    
+    def run_group_by_amplitude(self):
+        signal_df = self._create_signal_df()
+        signal_data = []
+
+        for signal in signal_df['signal_id']:
+            data = self._get_signal_data(signal, cursor=self.db.cursor)
+            y_values = data[self.current_tab]
+            signal_data.append({'signal_id': signal, 'data': y_values})
+        
+        signal_data_df = pd.DataFrame(signal_data)
+
+        df = self.matrix_profile_model.calculate_group_by_amplitude(signal_data_df)
+        return df

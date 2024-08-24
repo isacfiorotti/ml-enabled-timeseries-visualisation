@@ -1,5 +1,5 @@
 class VisMediator():
-    def __init__(self, data_mediator, tabs, treemap, grid_view, line_view):
+    def __init__(self, data_mediator, tabs, treemap, grid_view, line_view, treemap_tab):
         self.data_mediator = data_mediator
         self.tabs = tabs
         self.treemap = treemap
@@ -7,6 +7,7 @@ class VisMediator():
         self.line_view = line_view
         self.toggled_nodes = {} # By creating a toggled node dict we can improve efficiency instead of checking for all nodes every time
         self.clicked_cell = None
+        self.treemap_tab = treemap_tab
 
     def on_treemap_click(self, node, toggle):
         if toggle == False:
@@ -72,3 +73,33 @@ class VisMediator():
     def resolve_cell_click(self):
         if self.clicked_cell is not None:
             self.grid_view.set_cell_clicked(cell_name=self.clicked_cell)
+
+    def on_treemap_tab_click(self, tab):
+        print(tab)
+        if tab == 'All':
+            self.display_all_signals()
+        if tab == 'Length':
+            self.display_by_length()
+        if tab == 'Amplitude':
+            self.display_by_amplitude()
+
+    def display_all_signals(self):
+        # get all signals in the database
+        df = self.data_mediator._create_signal_df()
+        
+        # they don't have "nodes" so we need to give them one
+        df['count'] = 1
+        # send as normal to the 
+        self.treemap.create_treemap(node_counts=df['count'], labels=df['signal_id'])
+
+    def display_by_length(self):
+        df = self.data_mediator.run_group_by_length()
+        data = df[['node_id', 'count']].drop_duplicates()
+
+        self.treemap.create_treemap(node_counts=data['count'], labels=data['node_id'])
+
+    def display_by_amplitude(self):
+        df = self.data_mediator.run_group_by_amplitude()
+        data = df[['node_id', 'count']].drop_duplicates()
+
+        self.treemap.create_treemap(node_counts=data['count'], labels=data['node_id']) 

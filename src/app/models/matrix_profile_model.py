@@ -2,7 +2,7 @@ import stumpy
 import pandas as pd
 import numpy as np
 import time
-
+import ast
 
 class MatrixProfile():
     """ Class to represent the matrix profile calcation for each cell in the timeseries and output
@@ -112,6 +112,7 @@ class MatrixProfile():
         return signal_nodes
 
     def merge_nodes(self, previous_nodes, prev_signal_data, curr_signal_data, current_tab):
+
         """ Merge the previous nodes with the current nodes """
 
         result_df = previous_nodes.copy()
@@ -176,3 +177,67 @@ class MatrixProfile():
                 node_id += 1
 
         return result_df
+    
+    def calculate_group_by_length(self, signal_data):
+        # Define the time resolution (in seconds)
+        time_resolution = 0.002
+        
+        # Calculate signal length
+        signal_data['signal_length'] = signal_data['signal_idxs'].apply(lambda x: len(ast.literal_eval(x)))
+        
+        # Determine number of bins
+        num_bins = int(np.sqrt(len(signal_data)))
+        
+        # Create bins and labels reflecting the length ranges
+        signal_data['bin'], bin_edges = pd.cut(signal_data['signal_length'], bins=num_bins, retbins=True, include_lowest=True)
+        
+        # Create node names reflecting the time range
+        def length_to_time_range(bin_edge_left, bin_edge_right):
+            start_length = np.floor(bin_edge_left).astype(int) + 1  # start of the range (inclusive)
+            end_length = np.floor(bin_edge_right).astype(int)  # end of the range (exclusive)
+            start_time = (start_length - 1) * time_resolution
+            end_time = end_length * time_resolution
+            return f'{start_time:.3f}-{end_time:.3f}'
+
+        # Apply the correct time range calculation for each bin
+        signal_data['node_id'] = signal_data.apply(lambda x: length_to_time_range(x['bin'].left, x['bin'].right), axis=1)
+
+        # Count the number of signals in each bin
+        count_per_group = signal_data.groupby('node_id').size().reset_index(name='count')
+        
+        # Merge counts back to signal_data
+        signal_data = signal_data.merge(count_per_group, on='node_id')
+        
+        # Select relevant columns for output
+        output = signal_data[['node_id', 'signal_id', 'count']]
+        
+        return output
+    
+    def calculate_group_by_amplitude(self, signal_data):
+        # Step 1: Calculate the amplitude of each signal
+        # Assuming amplitude is the max of the 'data' array
+        signal_data['amplitude'] = signal_data['data'].apply(lambda x: (max(x) - min(x))/2)
+
+        # Step 2: Determine the number of bins using qcut for amplitude
+        num_bins = int(np.sqrt(len(signal_data)))
+        signal_data['bin'], bin_edges = pd.cut(signal_data['amplitude'], bins=num_bins, retbins=True, labels=False)
+
+        # Step 3: Create node names reflecting the amplitude range
+        def amplitude_range(bin_edge_left, bin_edge_right):
+            return f'{bin_edge_left:.3f}-{bin_edge_right:.3f}'
+
+        signal_data['node_id'] = signal_data.apply(
+            lambda x: amplitude_range(bin_edges[x['bin']], bin_edges[x['bin'] + 1] if x['bin'] + 1 < len(bin_edges) else bin_edges[-1]),
+            axis=1
+        )
+
+        # Step 4: Count the number of signals in each bin
+        count_per_group = signal_data.groupby('node_id').size().reset_index(name='count')
+
+        # Step 5: Merge counts back to signal_data
+        signal_data = signal_data.merge(count_per_group, on='node_id')
+
+        # Step 6: Select relevant columns for output
+        output = signal_data[['node_id', 'signal_id', 'count']]
+
+        return output
