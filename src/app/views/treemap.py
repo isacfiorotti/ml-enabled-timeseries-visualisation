@@ -10,20 +10,20 @@ class TreemapView(tk.Frame):
         self.nodes = {}
         self.canvas = tk.Canvas(self)
         self.canvas.pack(fill='both', expand=True)
-        self.bind('<Configure>', self.on_resize)
-        self.canvas.bind('<Leave>', self.on_leave)
         self.colors = ["#E74C3C", "#3498DB", "#27AE60", "#9B59B6", "#E67E22"] # Modern high-contrast palette for light grey background
         # self.update_treemap()
+        # self.canvas.bind('<Configure>', self.on_resize)
+        # self.canvas.bind('<Leave>', self.on_leave)
 
     def on_resize(self, event):
-        if self.data_mediator.previous_nodes is not None:
-            self.create_treemap(event)
+        pass
+        # The function will not work since create_treemaps needs a node_count and and label, we could store these in self from the create treemap function
+        # and just update based on the last available values.
 
-    def create_treemap(self, width=None, height=None, treemap_tab=None):
-        
+    def create_treemap(self, width=None, height=None, node_counts=None, labels=None):
         self.canvas.delete('all')
 
-        node_counts, labels = self.data_mediator.get_node_count_and_labels()
+        # node_counts, labels = self.data_mediator.get_node_count_and_labels()
 
         colors = [self.colors[i % len(self.colors)] for i in range(len(labels))]
 
@@ -49,19 +49,23 @@ class TreemapView(tk.Frame):
             self.canvas.tag_bind(node_id, '<Enter>', lambda event, label=label: self.on_enter(event, label))
             self.canvas.tag_bind(text, '<Enter>', lambda event, label=label: self.on_enter(event, label))
 
+
     def set_vis_mediator(self, vis_mediator):
         self.vis_mediator = vis_mediator
 
     def on_click(self, event, label):
-        toggle = self.nodes[label]['toggle']
-        self.vis_mediator.on_treemap_click(label, toggle)
+        # toggle = self.nodes[label]['toggle']
+        # self.vis_mediator.on_treemap_click(label, toggle)
+        pass
 
     def on_enter(self, event, label):
-        color = self.nodes[label]['color']
-        self.vis_mediator.on_treemap_enter(label, color)
+        # color = self.nodes[label]['color']
+        # self.vis_mediator.on_treemap_enter(label, color)
+        pass
 
     def on_leave(self, event):
-        self.vis_mediator.on_treemap_leave()
+        # self.vis_mediator.on_treemap_leave()
+        pass
 
     # def update_treemap(self):
     #     # Check if there's new data to process

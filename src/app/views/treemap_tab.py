@@ -38,7 +38,7 @@ class TreemapTab(tk.Frame):
 
     def create_tabs(self, headers, color='#DCDCDC'):
         rect_width = 120
-        rect_height = 20
+        rect_height = 15
         x_start = 3
         y_start = 5
 
@@ -78,6 +78,7 @@ class TreemapTab(tk.Frame):
     
     def on_click(self, tab):
         self.set_current_tab_color(tab)
+        self.vis_mediator.on_treemap_tab_click(tab)
 
     def set_current_tab_color(self, tab):
         if self.current_tab:
@@ -91,9 +92,5 @@ class TreemapTab(tk.Frame):
         self.canvas.itemconfig(rect, fill='#A9A9A9', outline='#A9A9A9')
         self.canvas.itemconfig(text, fill='#F0F0F0')
 
-    def on_resize(self, event=None):
-        self.canvas_text.config(width=self.canvas.winfo_width() * 0.5, height=self.canvas.winfo_height())
-        self.canvas_text.coords(self.text_id, self.canvas_text.winfo_width() * 0.5, self.canvas_text.winfo_height() * 0.5)
-
-
-        
+    def set_vis_mediator(self, vis_mediator):
+        self.vis_mediator = vis_mediator

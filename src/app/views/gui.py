@@ -69,7 +69,7 @@ class MainWindow(tk.Frame):
 
         #treemap
         self.treemap_frame = tk.Frame(self.top)
-        self.top.add(self.treemap_frame, stretch='always', minsize=370)
+        self.top.add(self.treemap_frame, stretch='always', minsize=385)
 
         self.treemap_tab = TreemapTab(self.treemap_frame)
         self.treemap_tab.pack(side='top', fill='x', expand=False)
@@ -87,10 +87,12 @@ class MainWindow(tk.Frame):
         self.line_view.pack(fill='both', expand=True)
 
         #vis mediator
-        vis_mediator = VisMediator(self.data_mediator, self.tabs, self.treemap, self.grid_view, self.line_view)
+        vis_mediator = VisMediator(self.data_mediator, self.tabs, self.treemap, self.grid_view, self.line_view, self.treemap_tab)
         self.tabs.set_vis_mediator(vis_mediator)
         self.treemap.set_vis_mediator(vis_mediator)
         self.grid_view.set_vis_mediator(vis_mediator)
+        self.treemap_tab.set_vis_mediator(vis_mediator)
+
 
         
 
