@@ -82,7 +82,8 @@ class GridView(tk.Frame):
 
     def check_for_processed_cells(self):
         if self.vis_mediator is not None:
-            self.vis_mediator.color_processed_cells()
+            if not self.vis_mediator.is_hovering:
+                self.vis_mediator.color_processed_cells()
         self.after(1000, self.check_for_processed_cells)
 
     def check_for_clicked_cell(self):

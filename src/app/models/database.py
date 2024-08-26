@@ -55,7 +55,8 @@ class SQLiteDB():
                 cell_id VARCHAR(255) PRIMARY KEY,
                 cell_id_start FLOAT,
                 cell_id_end FLOAT,
-                processed BOOLEAN DEFAULT FALSE
+                processed BOOLEAN DEFAULT FALSE,
+                has_signal BOOLEAN DEFAULT FALSE
             )''')
 
             self._create_data_tables()
