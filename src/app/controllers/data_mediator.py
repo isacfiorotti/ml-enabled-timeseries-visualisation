@@ -269,6 +269,7 @@ class DataMediator():
                             self.db.insert_signal_data(signal_id, signal_idxs, cell_id, self.current_tab, cursor, conn)
                             last_signal_id = signal_id
                         self._update_cell_processed(cell_id, cursor, conn)
+                        self._update_cell_signal(cell_id, cursor, conn)
 
                         # # calculate the signal nodes if there are no previous nodes
                         # if self.previous_nodes is None:
@@ -329,6 +330,17 @@ class DataMediator():
         cursor.execute(query, (cell_id,))
         conn.commit()
 
+    def _update_cell_signal(self, cell_id, cursor, conn):
+            
+        """ Updates the cell to processed """
+        query = f'''
+        UPDATE {self.db.sanitise(self.current_tab)}_cell_table
+        SET has_signal = TRUE
+        WHERE cell_id = ?
+        '''
+        cursor.execute(query, (cell_id,))
+        conn.commit()
+
     def _get_previous_nodes(self, cursor, conn):
 
         """ Returns the previous nodes """
@@ -373,6 +385,24 @@ class DataMediator():
 
         return cells
     
+    def get_cells_with_signals(self, cursor=None):
+            
+        """ Returns all the cells which have signals """
+        if cursor is None:
+            cursor = self.db.cursor
+        
+        query = f'''
+        SELECT cell_id FROM {self.db.sanitise(self.current_tab)}_cell_table
+        where has_signal = TRUE
+        '''
+
+        cursor.execute(query)
+        result = cursor.fetchall()
+        
+        cells = [str(cell[0]) for cell in result]
+
+        return cells
+
     def run_group_by_length(self):
         signal_data = self._create_signal_df()
         df = self.matrix_profile_model.calculate_group_by_length(signal_data)
