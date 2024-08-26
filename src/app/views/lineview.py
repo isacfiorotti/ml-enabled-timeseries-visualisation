@@ -17,7 +17,6 @@ class LineView(tk.Frame):
         self.canvas_fig.draw()
         self.canvas_fig.get_tk_widget().pack(fill=tk.BOTH, expand=True)
         self.data_mediator = data_mediator
-        self.colors = ['red', 'green', 'blue', 'purple', 'orange', 'brown', 'pink', 'gray', 'cyan', 'magenta'] # get colors from nodes
 
         # Initialize variables for scrolling
         self.is_dragging = False
@@ -28,7 +27,7 @@ class LineView(tk.Frame):
         self.scroll_speed = 2
         self.update_threshold = 5
 
-    def generate_plot(self, data, cell_id, cell_data):
+    def generate_plot(self, data, cell_id, cell_data, colors):
         # Drop first column
         data = data.drop(data.columns[0], axis=1)
         x, y = data.iloc[:, 0], data.iloc[:, 1]
@@ -41,6 +40,8 @@ class LineView(tk.Frame):
         self.fig.patch.set_facecolor('#f0f0f0')
         self.fig.subplots_adjust(bottom=0.2)
 
+        self.ax.set_title(f'Currently displaying: {cell_id}', color='grey')
+
         self.ax.set_ylabel(self.data_mediator.current_tab)
         self.ax.set_xlabel('Time')
 
@@ -50,7 +51,8 @@ class LineView(tk.Frame):
         signals_in_cell = self.get_signal_idxs_as_data(cell_id, cell_data)
 
         for i, (signal_id, signal_df) in enumerate(signals_in_cell):
-            color = self.colors[i % len(self.colors)]
+            
+            color = colors[i % len(colors)]
 
             x_signal = np.array(signal_df.loc[:, 'Time(s)'])  # Assumed to be string timestamps
             y_signal = np.array(signal_df.iloc[:, 2].values, dtype=np.float64)  # Numeric
