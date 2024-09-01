@@ -32,12 +32,12 @@ class MainWindow(tk.Frame):
         self.tab_frame.pack(fill='x')
 
         #plus icon
-        self.add_icon = AddIcon(self.tab_frame)
-        self.add_icon.pack(side='left')
+        # self.add_icon = AddIcon(self.tab_frame)
+        # self.add_icon.pack(side='left')
 
         #settings icon
-        self.add_icon = SettingsIcon(self.tab_frame)
-        self.add_icon.pack(side='right')
+        # self.add_icon = SettingsIcon(self.tab_frame)
+        # self.add_icon.pack(side='right')
 
         #tabs
         self.tabs = Tabs(self.tab_frame, self.data_mediator)
