@@ -34,6 +34,7 @@ class VisMediator():
             "#2C3E50"   # Dark Slate
         ]
         self.current_color_mapping = None
+        self.current_treemap_tab = None
 
     def on_treemap_click(self, node, toggle):
         if toggle == False:
@@ -49,9 +50,13 @@ class VisMediator():
         # self.color_processed_cells()
         self.is_hovering = True
        
-        for signal in self.current_data[self.current_data['node_id'] == node]['signal_id']:
-            #find which cell that signal is in and color it
-            cell = self.data_mediator.get_signal_cell(signal)
+        if self.current_treemap_tab != 'All':
+            for signal in self.current_data[self.current_data['node_id'] == node]['signal_id']:
+                #find which cell that signal is in and color it
+                cell = self.data_mediator.get_signal_cell(signal)
+                self.grid_view.set_cell_color(cell, color)
+        else:
+            cell = self.data_mediator.get_signal_cell(node)
             self.grid_view.set_cell_color(cell, color)
 
     def on_treemap_leave(self):
@@ -120,10 +125,13 @@ class VisMediator():
 
     def on_treemap_tab_click(self, tab):
         if tab == 'All':
+            self.current_treemap_tab = tab
             self.display_all_signals()
         if tab == 'Length':
             self.display_by_length()
+            self.current_treemap_tab = tab
         if tab == 'Amplitude':
+            self.current_treemap_tab = tab
             self.display_by_amplitude()
 
     def display_all_signals(self):
@@ -132,12 +140,11 @@ class VisMediator():
 
         self.current_data = df
 
-        self.set_current_color_mapping()
-        
+        self.treemap_legend.clear_legend()        
         # they don't have "nodes" so we need to give them one
         df['count'] = 1
         # send as normal to the 
-        self.treemap.create_treemap(node_counts=df['count'], labels=df['signal_id'], map_colors=['darkgrey'])
+        self.treemap.create_treemap(node_counts=df['count'], labels=df['signal_id'], map_colors=['#29465B'])
 
     def display_by_length(self):
         df = self.data_mediator.run_group_by_length()
