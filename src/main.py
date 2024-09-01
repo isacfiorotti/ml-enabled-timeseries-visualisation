@@ -17,13 +17,11 @@ def main():
 
     matrix_profile_model = MatrixProfile(100, 3, 0.01, 80, 15)
 
-    #TODO add function that checks for the data folder and checks if there are already files
     db = SQLiteDB(FILE_PATH, data_processor)
     data_mediator = DataMediator(FILE_PATH, db, data_processor, matrix_profile_model)
 
-    # Start a background thread for the matrix profile model operations
     matrix_profile_thread = threading.Thread(target=data_mediator.run_matrix_profile_operations)
-    matrix_profile_thread.daemon = True  # Daemonize thread to ensure it exits when the main program exits
+    matrix_profile_thread.daemon = True
     matrix_profile_thread.start()
 
     app = MainWindow(root, data_mediator)
