@@ -13,6 +13,9 @@ class TreemapLegend(tk.Frame):
     def draw_legend(self, colors, labels):
         self.canvas.delete("all")
 
+        color_label_pairs = sorted(zip(colors, labels), key=lambda pair: pair[1])
+        colors, labels = zip(*color_label_pairs)
+
         title = "Treemap Legend"
         self.canvas.create_text(60, 10, text=title, fill="grey", font=("Arial", 10, "bold"))
 
@@ -30,3 +33,6 @@ class TreemapLegend(tk.Frame):
 
     def set_vis_mediator(self, vis_mediator):
         self.vis_mediator = vis_mediator
+
+    def clear_legend(self):
+        self.canvas.delete('all')
