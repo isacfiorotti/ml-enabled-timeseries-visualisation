@@ -1,5 +1,6 @@
 import tkinter as tk
 import squarify # reference in work
+import re
 
 class TreemapView(tk.Frame):
     def __init__(self, parent, data_mediator, *args, **kwargs):
@@ -23,9 +24,9 @@ class TreemapView(tk.Frame):
         self.canvas.delete('all')
 
         # node_counts, labels = self.data_mediator.get_node_count_and_labels()
+        labels = sorted(labels, key=self.extract_start)
 
         colors = [map_colors[i % len(map_colors)] for i in range(len(labels))]
-
 
         if width is None or height is None:
             width = self.canvas.winfo_width()
@@ -40,7 +41,7 @@ class TreemapView(tk.Frame):
         for rect, label, color in zip(rects, labels, colors):
             x0, y0, x1, y1 = rect['x'], rect['y'], rect['x'] + rect['dx'], rect['y'] + rect['dy']
             node_id = self.canvas.create_rectangle(x0, y0, x1, y1, fill=color, outline="white")
-            text = self.canvas.create_text((x0 + x1) / 2, (y0 + y1) / 2, text=label, fill="lightgrey")
+            text = self.canvas.create_text((x0 + x1) / 2, (y0 + y1) / 2, text=label, fill="darkgrey", font=("Arial", 6))
             
             self.nodes[label] = {'color':color, 'toggle':False} # keeps track of whether button has been toggled 
 
@@ -76,3 +77,6 @@ class TreemapView(tk.Frame):
     #     self.after(1000, self.update_treemap)  # Update every 1000 ms (1 second)
 
     
+    def extract_start(self, label):
+        match = re.match(r'(\d+\.\d+)', label)
+        return float(match.group()) if match else float('inf')
