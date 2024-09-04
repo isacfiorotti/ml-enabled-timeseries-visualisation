@@ -9,7 +9,7 @@ class TreemapTab(tk.Frame):
         self.canvas.pack(fill='both', expand=True)
         self.tabs = {}
         self.current_tab = None
-        self.headers = ['All', 'Length', 'Amplitude']
+        self.headers = ['Length', 'Amplitude']
         self.create_tabs(self.headers)
 
     def create_rounded_rectangle(self, x1, y1, x2, y2, radius=2, **kwargs):
