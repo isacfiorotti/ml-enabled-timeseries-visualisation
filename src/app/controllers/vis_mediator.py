@@ -1,3 +1,5 @@
+import time
+
 class VisMediator():
     def __init__(self, data_mediator, tabs, treemap, grid_view, line_view, treemap_tab, treemap_legend):
         self.data_mediator = data_mediator
@@ -12,26 +14,29 @@ class VisMediator():
         self.current_data = None
         self.is_hovering = False
         self.colors = [
-            "#E74C3C",  # Red
-            "#3498DB",  # Blue
-            "#27AE60",  # Green
-            "#9B59B6",  # Purple
-            "#E67E22",  # Orange
-            "#F39C12",  # Yellow
-            "#1ABC9C",  # Teal
-            "#2ECC71",  # Light Green
-            "#8E44AD",  # Dark Purple
-            "#2980B9",  # Dark Blue
-            "#D35400",  # Dark Orange
-            "#C0392B",  # Dark Red
-            "#16A085",  # Dark Teal
-            "#F1C40F",  # Bright Yellow
-            "#BDC3C7",  # Light Gray
-            "#7F8C8D",  # Gray
-            "#34495E",  # Dark Blue-Grey
-            "#ECF0F1",  # Off White
-            "#95A5A6",  # Muted Gray
-            "#2C3E50"   # Dark Slate
+            "#FFFBE6",  # Lightest Yellow
+            "#FFF7CC",  # Very Pale Yellow
+            "#FFF3B3",  # Soft Yellow
+            "#FFEF99",  # Light Yellow
+            "#FFEB80",  # Mild Yellow
+            "#FFE666",  # Light Gold
+            "#FFE24D",  # Pale Gold
+            "#FFDD33",  # Vivid Yellow
+            "#FFD91A",  # Bright Yellow
+            "#FFD500",  # Golden Yellow
+            "#FFCC00",  # Yellow-Orange
+            "#FFC200",  # Light Orange
+            "#FFB800",  # Orange
+            "#FFAD00",  # Deep Orange
+            "#FFA500",  # Strong Orange
+            "#FF8C00",  # Dark Orange
+            "#FF7300",  # Burnt Orange
+            "#FF5A00",  # Deep Orange
+            "#FF4500",  # Fire Orange
+            "#CC3500",  # Darker Orange
+            "#992700",  # Deep Rust
+            "#661A00",  # Very Dark Orange
+            "#331000"   # Almost Black Orange
         ]
         self.current_color_mapping = None
         self.current_treemap_tab = None
@@ -74,6 +79,7 @@ class VisMediator():
                 self.grid_view.set_cell_color(cell, color)
 
     def on_grid_view_click(self, cell_id):
+        start_time = time.time()
         data = self.data_mediator.get_cell_data(cell_id)
 
         # get all signals in the cell
@@ -92,7 +98,7 @@ class VisMediator():
             self.grid_view.set_cell_unclicked(self.clicked_cell)
         self.clicked_cell = cell_id
         self.grid_view.set_cell_clicked(cell_id)
-        
+
     
     def on_tab_click(self, current_tab):
         self.data_mediator._set_current_tab(current_tab)
@@ -124,27 +130,36 @@ class VisMediator():
             self.grid_view.set_cell_clicked(cell_name=self.clicked_cell)
 
     def on_treemap_tab_click(self, tab):
-        if tab == 'All':
-            self.current_treemap_tab = tab
-            self.display_all_signals()
+        # if tab == 'All':
+        #     start_time = time.time()
+        #     self.current_treemap_tab = tab
+        #     self.display_all_signals()
+        #     end_time = time.time()
+        #     print(f'function display_all_signals took: {end_time - start_time}')
         if tab == 'Length':
+            start_time = time.time()
             self.display_by_length()
+            end_time = time.time()
+            print(f'function display_by_length took: {end_time - start_time}')
             self.current_treemap_tab = tab
         if tab == 'Amplitude':
+            start_time = time.time()
             self.current_treemap_tab = tab
             self.display_by_amplitude()
+            end_time = time.time()
+            print(f'function display_by_amplitude took: {end_time - start_time}')
 
-    def display_all_signals(self):
-        # get all signals in the database
-        df = self.data_mediator._create_signal_df()
+    # def display_all_signals(self):
+    #     # get all signals in the database
+    #     df = self.data_mediator._create_signal_df()
 
-        self.current_data = df
+    #     self.current_data = df
 
-        self.treemap_legend.clear_legend()        
-        # they don't have "nodes" so we need to give them one
-        df['count'] = 1
-        # send as normal to the 
-        self.treemap.create_treemap(node_counts=df['count'], labels=df['signal_id'], map_colors=['#29465B'])
+    #     self.treemap_legend.clear_legend()        
+    #     # they don't have "nodes" so we need to give them one
+    #     df['count'] = 1
+    #     # send as normal to the 
+    #     self.treemap.create_treemap(node_counts=df['count'], labels=df['signal_id'], map_colors=['#29465B'])
 
     def display_by_length(self):
         df = self.data_mediator.run_group_by_length()
