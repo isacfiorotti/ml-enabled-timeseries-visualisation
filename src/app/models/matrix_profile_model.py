@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import time
 import ast
-from dtaidistance import dtw
+from sklearn.cluster import AgglomerativeClustering
 
 class MatrixProfile():
     """ Class to represent the matrix profile calcation for each cell in the timeseries and output
@@ -15,6 +15,7 @@ class MatrixProfile():
         self.mp_threshold = mp_threshold
         self.gap_threshold = gap_threshold
         self.base_signal_length = base_signal_length
+        self.cluster_threshold = 14
 
     def calculate_signals(self, cell_data):
         """ Calculate the matrix profile for the timeseries cell """
@@ -65,7 +66,8 @@ class MatrixProfile():
         # Determine number of bins
         num_bins = int(np.sqrt(len(signal_data)))
         signal_data['bin'], bin_edges = pd.cut(signal_data['signal_length'], bins=num_bins, retbins=True, include_lowest=True)
-        
+
+
         # Create node names reflecting the time range
         def length_to_time_range(bin_edge_left, bin_edge_right):
             start_length = np.floor(bin_edge_left).astype(int) + 1  # start of the range (inclusive)
@@ -75,14 +77,21 @@ class MatrixProfile():
             return f'{start_time:.3f}-{end_time:.3f}'
 
         signal_data['node_id'] = signal_data.apply(lambda x: length_to_time_range(x['bin'].left, x['bin'].right), axis=1)
+
+        clusters_df = pd.DataFrame()
+
+        for node in signal_data['node_id'].unique():
+            signals_in_node = signal_data[signal_data['node_id'] == node]
+            cluster = self.calculate_group_clusters(signals_in_node)
+            clusters_df = pd.concat([clusters_df, cluster], ignore_index=True)
+
         count_per_group = signal_data.groupby('node_id').size().reset_index(name='count')
         signal_data = signal_data.merge(count_per_group, on='node_id')
-        output = signal_data[['node_id', 'signal_id', 'count']]
-        
+        output = signal_data.merge(clusters_df[['signal_id', 'cluster', 'cluster_count']], on='signal_id', how='left')
+        output = output[['node_id', 'signal_id', 'count', 'cluster', 'cluster_count']]
+
+
         return output
-    
-    def group_by_dtw(self, signal_data):
-        pass
 
     def calculate_group_by_amplitude(self, signal_data):
 
@@ -100,8 +109,60 @@ class MatrixProfile():
             axis=1
         )
 
+        clusters_df = pd.DataFrame()
+
+        for node in signal_data['node_id'].unique():
+            signals_in_node = signal_data[signal_data['node_id'] == node]
+            cluster = self.calculate_group_clusters(signals_in_node)
+            clusters_df = pd.concat([clusters_df, cluster], ignore_index=True)
+
         count_per_group = signal_data.groupby('node_id').size().reset_index(name='count')
         signal_data = signal_data.merge(count_per_group, on='node_id')
-        output = signal_data[['node_id', 'signal_id', 'count']]
+        output = signal_data.merge(clusters_df[['signal_id', 'cluster', 'cluster_count']], on='signal_id', how='left')
+        output = output[['node_id', 'signal_id', 'count', 'cluster', 'cluster_count']]
 
         return output
+    
+    def calculate_group_clusters(self, signal_data):
+        # handle the case where signal_data only has one signal
+        signal_data = signal_data.copy()
+
+        if len(signal_data) == 1:
+            signal_data.loc[:, 'cluster'] = 0
+            signal_data.loc[:, 'count'] = 1
+            # rename count to cluster_count
+            signal_data.rename(columns={'count': 'cluster_count'}, inplace=True)
+            return signal_data[['cluster', 'signal_id', 'cluster_count']]
+
+        signal_data.loc[:, 'data'] = signal_data['data'].apply(lambda x: np.array(x))
+        signal_data.loc[:, 'signal_length'] = signal_data['data'].apply(lambda x: len(x))
+
+        distance_matrix = np.zeros((len(signal_data), len(signal_data)))
+
+        for i in range(len(signal_data)):
+            signal_a = signal_data.iloc[i]['data']
+            for j in range(i+1, len(signal_data)):
+                signal_b = signal_data.iloc[j]['data']
+
+                if len(signal_a) > len(signal_b):
+                    signal_b = np.pad(signal_b, (0, len(signal_a) - len(signal_b)), 'constant')
+                elif len(signal_b) > len(signal_a):
+                    signal_a = np.pad(signal_a, (0, len(signal_b) - len(signal_a)), 'constant')
+
+                distance = stumpy.mass(signal_a, signal_b)
+                distance_matrix[i, j] = distance[0]
+                distance_matrix[j, i] = distance[0]
+
+        # Cluster the signals
+        clustering = AgglomerativeClustering(n_clusters=None, metric='precomputed', linkage='average', distance_threshold=self.cluster_threshold).fit(distance_matrix)
+        signal_data.loc[:, 'cluster'] = clustering.labels_
+
+        count_per_group = signal_data.groupby('cluster').size().reset_index(name='cluster_count')
+        signal_data = signal_data.merge(count_per_group, on='cluster')
+        output = signal_data[['cluster', 'signal_id', 'cluster_count']]
+
+        return output
+
+
+
+

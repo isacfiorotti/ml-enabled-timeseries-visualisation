@@ -1,4 +1,5 @@
 import time
+import re
 
 class VisMediator():
     def __init__(self, data_mediator, tabs, treemap, grid_view, line_view, treemap_tab, treemap_legend):
@@ -14,29 +15,21 @@ class VisMediator():
         self.current_data = None
         self.is_hovering = False
         self.colors = [
-            "#FFFBE6",  # Lightest Yellow
-            "#FFF7CC",  # Very Pale Yellow
-            "#FFF3B3",  # Soft Yellow
-            "#FFEF99",  # Light Yellow
-            "#FFEB80",  # Mild Yellow
+            "#6DBE45",  # Fresh Green
+            "#9ACD32",  # Yellow Green
             "#FFE666",  # Light Gold
-            "#FFE24D",  # Pale Gold
-            "#FFDD33",  # Vivid Yellow
-            "#FFD91A",  # Bright Yellow
             "#FFD500",  # Golden Yellow
-            "#FFCC00",  # Yellow-Orange
-            "#FFC200",  # Light Orange
-            "#FFB800",  # Orange
             "#FFAD00",  # Deep Orange
-            "#FFA500",  # Strong Orange
             "#FF8C00",  # Dark Orange
-            "#FF7300",  # Burnt Orange
-            "#FF5A00",  # Deep Orange
-            "#FF4500",  # Fire Orange
             "#CC3500",  # Darker Orange
-            "#992700",  # Deep Rust
             "#661A00",  # Very Dark Orange
-            "#331000"   # Almost Black Orange
+            "#007FFF",  # Vivid Sky Blue
+            "#3399FF",  # Bright Blue
+            "#0033CC",  # Medium Blue
+            "#A64D79",  # Light Purple
+            "#9B4F7D",  # Medium Purple
+            "#6D3F6C",  # Dark Purple
+            "#2E2A80",  # Very Dark Purple
         ]
         self.current_color_mapping = None
         self.current_treemap_tab = None
@@ -50,19 +43,20 @@ class VisMediator():
                 del self.toggled_nodes[node]
             self.treemap.nodes[node]['toggle'] = False
 
-    def on_treemap_enter(self, node, color):
+    def on_treemap_enter(self, cluster, color, node):
         # self.grid_view.create_grid_view()
         # self.color_processed_cells()
         self.is_hovering = True
        
-        if self.current_treemap_tab != 'All':
-            for signal in self.current_data[self.current_data['node_id'] == node]['signal_id']:
-                #find which cell that signal is in and color it
-                cell = self.data_mediator.get_signal_cell(signal)
-                self.grid_view.set_cell_color(cell, color)
-        else:
-            cell = self.data_mediator.get_signal_cell(node)
+        signals_in_node = self.current_data[self.current_data['node_id'] == node]
+
+        signals_in_cluster = signals_in_node[signals_in_node['cluster'] == cluster]
+
+        for signal in signals_in_cluster.iterrows():
+            signal_id = signal[1]['signal_id']
+            cell = self.data_mediator.get_signal_cell(signal_id)
             self.grid_view.set_cell_color(cell, color)
+
 
     def on_treemap_leave(self):
         # self.grid_view.create_grid_view()
@@ -79,7 +73,6 @@ class VisMediator():
                 self.grid_view.set_cell_color(cell, color)
 
     def on_grid_view_click(self, cell_id):
-        start_time = time.time()
         data = self.data_mediator.get_cell_data(cell_id)
 
         # get all signals in the cell
@@ -99,7 +92,6 @@ class VisMediator():
         self.clicked_cell = cell_id
         self.grid_view.set_cell_clicked(cell_id)
 
-    
     def on_tab_click(self, current_tab):
         self.data_mediator._set_current_tab(current_tab)
         grid_size = self.data_mediator.get_grid_size()
@@ -137,17 +129,13 @@ class VisMediator():
         #     end_time = time.time()
         #     print(f'function display_all_signals took: {end_time - start_time}')
         if tab == 'Length':
-            start_time = time.time()
             self.display_by_length()
-            end_time = time.time()
-            print(f'function display_by_length took: {end_time - start_time}')
             self.current_treemap_tab = tab
         if tab == 'Amplitude':
-            start_time = time.time()
             self.current_treemap_tab = tab
             self.display_by_amplitude()
-            end_time = time.time()
-            print(f'function display_by_amplitude took: {end_time - start_time}')
+
+
 
     # def display_all_signals(self):
     #     # get all signals in the database
@@ -162,14 +150,17 @@ class VisMediator():
     #     self.treemap.create_treemap(node_counts=df['count'], labels=df['signal_id'], map_colors=['#29465B'])
 
     def display_by_length(self):
-        df = self.data_mediator.run_group_by_length()
+        df = self.data_mediator.run_group_by_length() # make this funciton also return the leaves of the tree
         self.current_data = df
 
         self.set_current_color_mapping()
 
+        line_data = self.data_mediator.get_line_data(df)
+
         data = df[['node_id', 'count']].drop_duplicates()
-        self.treemap.create_treemap(node_counts=data['count'], labels=data['node_id'], map_colors=self.colors)
+        self.treemap.create_treemap(node_counts_df=data[['count', 'node_id']], labels=data['node_id'], map_colors=self.colors, cluster_df=df, line_data=line_data)
         self.create_treemap_legend(labels=data['node_id'].tolist())
+
 
     def display_by_amplitude(self):
         df = self.data_mediator.run_group_by_amplitude()
@@ -177,15 +168,22 @@ class VisMediator():
 
         self.set_current_color_mapping()
 
+        line_data = self.data_mediator.get_line_data(df)
+
         data = df[['node_id', 'count']].drop_duplicates()
-        self.treemap.create_treemap(node_counts=data['count'], labels=data['node_id'], map_colors=self.colors)
+        self.treemap.create_treemap(node_counts_df=data[['count', 'node_id']], labels=data['node_id'], map_colors=self.colors, cluster_df=df, line_data=line_data)
         self.create_treemap_legend(labels=data['node_id'].tolist())
 
     def create_treemap_legend(self, labels):
         self.treemap_legend.draw_legend(colors=self.colors, labels=labels)
     
-    def set_current_color_mapping(self):
-        # take the current data and create a mapping of node_id to color
-        self.current_color_mapping = {}
-        for i, node in enumerate(self.current_data['node_id'].drop_duplicates()):
-            self.current_color_mapping[node] = self.colors[i % len(self.colors)]
+    def set_current_color_mapping(self, colors=None):
+        if colors is None:
+            colors = self.colors
+        labels = self.current_data['node_id'].unique()
+        sorted_labels = sorted(labels, key=self.extract_start)
+        self.current_color_mapping = {label: color for label, color in zip(sorted_labels, colors)}
+
+    def extract_start(self, label):
+        match = re.match(r'(\d+\.\d+)', label)
+        return float(match.group()) if match else float('inf')
