@@ -235,17 +235,13 @@ class DataMediator():
     def run_matrix_profile_operations(self):
         
         while True:
-
-            if self.current_tab is not None:      
+            if self.current_tab is not None:
                 conn, cursor = self.db.connect()
                 self.sequence = self._get_all_cells(cursor)     
                 for cell_id in self.sequence:
-                    
-                    print('Processing cell:', cell_id)
 
                     # check if the cell has already been processed
                     if self._is_cell_processed(cell_id, cursor):
-                        print('Cell already processed:', cell_id)
                         # query for previous nodes
                         self.previous_nodes = self._get_previous_nodes(cursor, conn)
                         continue
@@ -256,7 +252,6 @@ class DataMediator():
 
                     # check if the current cell has no signals
                     if not signals_in_cell:
-                        print('No signals in cell:', cell_id)
                         self._update_cell_processed(cell_id, cursor, conn)
                         continue
 
