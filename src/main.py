@@ -15,7 +15,7 @@ def main():
 
     data_processor = DataProcessor(FILE_PATH) 
 
-    matrix_profile_model = MatrixProfile(120, 0.9, 0.01, 220)
+    matrix_profile_model = MatrixProfile(120, 2, 0.01, 220)
 
     db = SQLiteDB(FILE_PATH, data_processor)
     data_mediator = DataMediator(FILE_PATH, db, data_processor, matrix_profile_model)
