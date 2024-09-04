@@ -1,6 +1,7 @@
 import sqlite3
 import os
 import re
+import time
 
 class SQLiteDB():
     def __init__(self, file_path, data_processor):
@@ -94,23 +95,21 @@ class SQLiteDB():
 
     def _insert_data(self):
         for header in self.data_processor.get_headers():
-            sanitised = self.sanitise(header)
-            data = self.data_processor.read_data()
-            time = data['Time(s)']
-            values = data[header]
-            data_table = f'{sanitised}_data_table'
-            batch_data = [(t, v) for t, v in zip(time, values)]
-            try:
-                self.cursor.executemany(f'''
-                INSERT INTO {data_table} (Time_s_, {sanitised})
-                VALUES (?, ?)
-                ''', batch_data)
-                self.conn.commit()
-            except sqlite3.IntegrityError as e:
-                print(f"An integrity error occurred: {e}. Skipping problematic entries.")
+                sanitised = self.sanitise(header)
+                data = self.data_processor.read_data()
+                time_data = data['Time(s)']
+                values = data[header]
+                data_table = f'{sanitised}_data_table'
+                batch_data = [(t, v) for t, v in zip(time_data, values)]
+                try:
+                    self.cursor.executemany(f'''
+                    INSERT INTO {data_table} (Time_s_, {sanitised})
+                    VALUES (?, ?)
+                    ''', batch_data)
+                    self.conn.commit()
+                except sqlite3.IntegrityError as e:
+                    print(f"An integrity error occurred: {e}. Skipping problematic entries.")
 
-    def insert_groups(self, header, groups):
-        pass
 
     def close(self):
         self.cursor.close()
