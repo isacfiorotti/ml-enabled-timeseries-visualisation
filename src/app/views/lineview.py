@@ -2,10 +2,11 @@ import tkinter as tk
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.widgets import Slider
 import ast
 from datetime import datetime
+
 
 class LineView(tk.Frame):
     def __init__(self, parent, data_mediator, *args, **kwargs):
@@ -17,6 +18,7 @@ class LineView(tk.Frame):
         self.canvas_fig.draw()
         self.canvas_fig.get_tk_widget().pack(fill=tk.BOTH, expand=True)
         self.data_mediator = data_mediator
+        self.toolbar = NavigationToolbar2Tk(self.canvas_fig, self.canvas_frame)
 
         # Initialize variables for scrolling
         self.is_dragging = False
@@ -26,6 +28,8 @@ class LineView(tk.Frame):
         self.display_count = 500
         self.scroll_speed = 2
         self.update_threshold = 5
+
+
 
     def generate_plot(self, data, cell_id, cell_data, colors):
         # Drop first column
@@ -126,6 +130,7 @@ class LineView(tk.Frame):
         self.canvas_fig.get_tk_widget().pack(fill=tk.BOTH, expand=True)
         self.fig = fig
         self.fig.canvas.draw_idle()
+        self.toolbar.canvas = self.canvas_fig
 
     def update_display(self, start_index):
         if start_index < 0 or start_index + self.display_count > len(self.data_x):
