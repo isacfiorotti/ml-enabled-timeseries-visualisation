@@ -1,4 +1,5 @@
 import tkinter as tk
+import re
 
 class TreemapLegend(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
@@ -13,9 +14,8 @@ class TreemapLegend(tk.Frame):
     def draw_legend(self, colors, labels):
         self.canvas.delete("all")
 
-        color_label_pairs = sorted(zip(colors, labels), key=lambda pair: pair[1])
-        colors, labels = zip(*color_label_pairs)
-
+        labels = sorted(labels, key=self.extract_start)
+    
         title = "Treemap Legend"
         self.canvas.create_text(60, 10, text=title, fill="grey", font=("Arial", 10, "bold"))
 
@@ -36,3 +36,7 @@ class TreemapLegend(tk.Frame):
 
     def clear_legend(self):
         self.canvas.delete('all')
+
+    def extract_start(self, label):
+        match = re.match(r'(\d+\.\d+)', label)
+        return float(match.group()) if match else float('inf')
