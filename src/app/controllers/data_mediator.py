@@ -76,6 +76,7 @@ class DataMediator():
         return headers
     
     def get_grid_size(self):
+        """ Returns the number of cells in the current tab """
         sanitised = self.db.sanitise(self.current_tab)
         cursor = self.db.cursor.execute(f'SELECT COUNT(*) FROM {sanitised}_cell_table')
         grid_size = cursor.fetchone()[0]
@@ -419,3 +420,24 @@ class DataMediator():
     def extract_start(self, label):
         match = re.match(r'(\d+\.\d+)', label)
         return float(match.group()) if match else float('inf')
+
+    def get_cell_start_as_time(self, cell_id):
+        """ Returns the start of the cell """
+        query = f'''
+        SELECT cell_id_start FROM {self.db.sanitise(self.current_tab)}_cell_table
+        WHERE cell_id = ?
+        '''
+        cursor = self.db.cursor
+        cursor.execute(query, (cell_id,))
+        result = cursor.fetchone()[0]
+        result = int(result) + 1
+
+        query2 = f'''
+        SELECT Time_s_ FROM {self.db.sanitise(self.current_tab)}_data_table
+        WHERE id = ?
+        '''
+        cursor.execute(query2, (result,))
+
+        time = cursor.fetchone()[0]
+
+        return time
