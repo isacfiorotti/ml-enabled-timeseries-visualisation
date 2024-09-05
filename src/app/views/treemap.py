@@ -11,7 +11,6 @@ class TreemapView(tk.Frame):
         self.nodes = {}
         self.canvas = tk.Canvas(self)
         self.canvas.pack(fill='both', expand=True)
-        self.canvas.bind('<Leave>', self.on_leave)
 
     def create_treemap(self, width=None, height=None, node_counts_df=None, labels=None, map_colors=None, cluster_df=None, line_data=None):
         self.canvas.delete('all')
@@ -71,6 +70,7 @@ class TreemapView(tk.Frame):
             rect_id = self.canvas.create_rectangle(x0_rect, y0_rect, x1_rect, y1_rect, fill=color, outline="white")
             # self.canvas.create_text((x0_rect + x1_rect) / 2, (y0_rect + y1_rect) / 2, text=label, fill="darkgrey", font=("Arial", 6))
 
+
             if line_data is not None:
                 data = line_data[line_data['cluster'] == label]['data'].iloc[0]
                 self.draw_line_inside(x0_rect, y0_rect, x1_rect, y1_rect, data)
@@ -82,8 +82,10 @@ class TreemapView(tk.Frame):
                 'color': color,
                 'toggle': False
             }
-
+            
             self.canvas.tag_bind(rect_id, '<Enter>', lambda event, rect_id=rect_id: self.on_enter(event, rect_id))
+            self.canvas.tag_bind(rect_id, '<Leave>', self.on_leave)
+        
 
     def draw_line_inside(self, x0, y0, x1, y1, data):
         x0 = x0 + 0.05 * (x1 - x0)
