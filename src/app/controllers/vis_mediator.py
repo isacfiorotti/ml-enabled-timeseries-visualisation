@@ -45,7 +45,7 @@ class VisMediator():
 
     def on_treemap_enter(self, cluster, color, node):
         # self.grid_view.create_grid_view()
-        # self.color_processed_cells()
+        self.color_processed_cells()
         self.is_hovering = True
        
         signals_in_node = self.current_data[self.current_data['node_id'] == node]
@@ -62,6 +62,7 @@ class VisMediator():
         # self.grid_view.create_grid_view()
         # self.color_processed_cells()
         self.is_hovering = False
+        self.grid_view.create_grid_view()
         
         
     def resolve_treemap_toggles(self): # This code is similar to treemap enter consider separating it into different things
@@ -93,18 +94,26 @@ class VisMediator():
         self.grid_view.set_cell_clicked(cell_id)
 
     def on_tab_click(self, current_tab):
+
+        # End any previous subthreads
+
+        # Start the subthread to calculate the matrix profile
+
         self.data_mediator._set_current_tab(current_tab)
         grid_size = self.data_mediator.get_grid_size()
         self.grid_view.set_grid_size(grid_size)
-        self.grid_view.create_grid_view()
+        # access the grid view row and column values 
+        rows = self.grid_view.rows
+        cols = self.grid_view.cols
 
-        # first check if the matrix profile has already been calculated
+        cell_starts = []
+        for i in range(rows):
+            # always get the first cell in the row
+            cell_name = f'cell_{i * cols}'
+            cell_starts.append(self.data_mediator.get_cell_start_as_time(cell_name))
 
-        # if it has been calculated then we can just create the treemap
+        self.grid_view.create_grid_view(cell_starts)
 
-        # if it hasn't been calculated then we need to start the subthread to calculate the matrix profile
-
-        # once a mp for a cell has been calculated we need to store it in the database and update the treemap
 
     def color_processed_cells(self):
         if self.data_mediator.current_tab is not None:
@@ -128,9 +137,9 @@ class VisMediator():
         #     self.display_all_signals()
         #     end_time = time.time()
         #     print(f'function display_all_signals took: {end_time - start_time}')
-        if tab == 'Length':
-            self.display_by_length()
+        if tab == 'Duration (s)':
             self.current_treemap_tab = tab
+            self.display_by_length()
         if tab == 'Amplitude':
             self.current_treemap_tab = tab
             self.display_by_amplitude()
@@ -175,7 +184,7 @@ class VisMediator():
         self.create_treemap_legend(labels=data['node_id'].tolist())
 
     def create_treemap_legend(self, labels):
-        self.treemap_legend.draw_legend(colors=self.colors, labels=labels)
+        self.treemap_legend.draw_legend(colors=self.colors, labels=labels, title=self.current_treemap_tab)
     
     def set_current_color_mapping(self, colors=None):
         if colors is None:
