@@ -35,9 +35,9 @@ class MainWindow(tk.Frame):
         # self.add_icon = AddIcon(self.tab_frame)
         # self.add_icon.pack(side='left')
 
-        #settings icon
-        # self.add_icon = SettingsIcon(self.tab_frame)
-        # self.add_icon.pack(side='right')
+        # settings icon
+        self.add_icon = SettingsIcon(self.tab_frame)
+        self.add_icon.pack(side='right')
 
         #tabs
         self.tabs = Tabs(self.tab_frame, self.data_mediator)
@@ -59,14 +59,14 @@ class MainWindow(tk.Frame):
         self.gridview_tab_top = GridviewTabTop(self.grid_frame)
         self.gridview_tab_top.pack(fill='x', expand=False)
 
-        self.gridview_axis_y = GridAxisY(self.grid_frame)
-        self.gridview_axis_y.pack(fill='y', expand=False, side='left')
+        # self.gridview_axis_y = GridAxisY(self.grid_frame)
+        # self.gridview_axis_y.pack(fill='y', expand=False, side='left')
         
         self.grid_view = GridView(self.grid_frame)
         self.grid_view.pack(fill='both', expand=True)
 
-        self.gridview_axis_x = GridAxisX(self.grid_frame)
-        self.gridview_axis_x.pack(fill='x', expand=False)
+        # self.gridview_axis_x = GridAxisX(self.grid_frame)
+        # self.gridview_axis_x.pack(fill='x', expand=False)
 
         #treemap
         self.treemap_frame = tk.Frame(self.top)
