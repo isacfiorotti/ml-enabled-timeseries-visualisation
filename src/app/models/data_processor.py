@@ -2,7 +2,6 @@
 import pandas as pd
 import dask.dataframe as dd
 import os
-from app.models.matrix_profile import MatrixProfile
 from app.config import CHUNK_SIZE
 
 class DataProcessor():
@@ -10,7 +9,6 @@ class DataProcessor():
         self.file_path = file_path
         self.chunk_size = CHUNK_SIZE
         self._generate_metadata()
-        self.matrix_profile = MatrixProfile()
 
     def get_headers(self):
         """Returns the headers of the data file without Time (s)"""
@@ -30,15 +28,13 @@ class DataProcessor():
         cell_ids = []
         cell_id_starts = []
         cell_id_ends = []
-        signal_ids = []
 
         for i, chunk in enumerate(chunks):
             cell_ids.append(f"cell_{i}")
             cell_id_starts.append(chunk.index[0])
             cell_id_ends.append(chunk.index[-1])
-            signal_ids.append('signal1') # change to get signal ids from matrix profile
 
-        return cell_ids, cell_id_starts, cell_id_ends, signal_ids
+        return cell_ids, cell_id_starts, cell_id_ends, 
 
 
     def _generate_metadata(self):
@@ -64,3 +60,4 @@ class DataProcessor():
     def read_data(self):
         data = pd.read_csv(self.file_path)
         return data
+    
