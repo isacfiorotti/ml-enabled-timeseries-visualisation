@@ -6,12 +6,11 @@ class SQLiteDB():
     def __init__(self, file_path, data_processor):
         self.data_processor = data_processor
         self.db_directory = os.path.dirname(file_path)
-        self.prefix = self._get_db_prefix(file_path)  # Takes input data file path
+        self.prefix = self._get_db_prefix(file_path)
         self._connect_to_db()
-        # if not self._check_for_existing_db( , need to make the cheks more sophisticated
-        # self._create_tables()
-        # self._insert_cells()
-        # self._insert_data()
+        self._create_tables()
+        self._insert_cells()
+        self._insert_data()
 
     def _check_for_existing_db(self):
         '''Check if the database already exists. If it does, return True.'''
@@ -55,7 +54,8 @@ class SQLiteDB():
                 cell_id VARCHAR(255) PRIMARY KEY,
                 cell_id_start FLOAT,
                 cell_id_end FLOAT,
-                processed BOOLEAN DEFAULT FALSE
+                processed BOOLEAN DEFAULT FALSE,
+                has_signal BOOLEAN DEFAULT FALSE
             )''')
 
             self._create_data_tables()
@@ -93,23 +93,21 @@ class SQLiteDB():
 
     def _insert_data(self):
         for header in self.data_processor.get_headers():
-            sanitised = self.sanitise(header)
-            data = self.data_processor.read_data()
-            time = data['Time(s)']
-            values = data[header]
-            data_table = f'{sanitised}_data_table'
-            batch_data = [(t, v) for t, v in zip(time, values)]
-            try:
-                self.cursor.executemany(f'''
-                INSERT INTO {data_table} (Time_s_, {sanitised})
-                VALUES (?, ?)
-                ''', batch_data)
-                self.conn.commit()
-            except sqlite3.IntegrityError as e:
-                print(f"An integrity error occurred: {e}. Skipping problematic entries.")
+                sanitised = self.sanitise(header)
+                data = self.data_processor.read_data()
+                time_data = data['Time(s)']
+                values = data[header]
+                data_table = f'{sanitised}_data_table'
+                batch_data = [(t, v) for t, v in zip(time_data, values)]
+                try:
+                    self.cursor.executemany(f'''
+                    INSERT INTO {data_table} (Time_s_, {sanitised})
+                    VALUES (?, ?)
+                    ''', batch_data)
+                    self.conn.commit()
+                except sqlite3.IntegrityError as e:
+                    print(f"An integrity error occurred: {e}. Skipping problematic entries.")
 
-    def insert_groups(self, header, groups):
-        pass
 
     def close(self):
         self.cursor.close()

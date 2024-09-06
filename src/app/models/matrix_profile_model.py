@@ -2,18 +2,20 @@ import stumpy
 import pandas as pd
 import numpy as np
 import time
-
+import ast
+from sklearn.cluster import AgglomerativeClustering
 
 class MatrixProfile():
     """ Class to represent the matrix profile calcation for each cell in the timeseries and output
     the gropued signals in each cell
     """
-    def __init__(self, mp_window_size, mp_threshold, gap_threshold, base_signal_length, mp_merge_sensitivity):
+
+    def __init__(self, mp_window_size, mp_threshold, gap_threshold, base_signal_length, cluster_threshold):
         self.mp_window_size = mp_window_size
         self.mp_threshold = mp_threshold
         self.gap_threshold = gap_threshold
         self.base_signal_length = base_signal_length
-        self.mp_merging_sensitivity = mp_merge_sensitivity
+        self.cluster_threshold = cluster_threshold
 
     def calculate_signals(self, cell_data):
         """ Calculate the matrix profile for the timeseries cell """
@@ -55,124 +57,106 @@ class MatrixProfile():
         signals = [signal for signal in signals if not signal.empty and len(signal) >= self.base_signal_length]
         
         return signals
+    
+    def calculate_group_by_length(self, signal_data):
+        time_resolution = 0.002
+        
+        signal_data['signal_length'] = signal_data['signal_idxs'].apply(lambda x: len(ast.literal_eval(x)))
+    
+        num_bins = int(np.sqrt(len(signal_data)))
+        signal_data['bin'], bin_edges = pd.cut(signal_data['signal_length'], bins=num_bins, retbins=True, include_lowest=True)
 
-    def calculate_signal_nodes(self, signal_data, current_tab, last_signal_id=None):
-        """ Calculate the signal nodes for the cell """
-        # Initialize variables
-        signal_mass_scores = {}
-        signal_nodes = pd.DataFrame(columns=['node_id', 'signal_id'])
+        def length_to_time_range(bin_edge_left, bin_edge_right):
+            start_length = np.floor(bin_edge_left).astype(int) + 1 
+            end_length = np.floor(bin_edge_right).astype(int) 
+            start_time = (start_length - 1) * time_resolution
+            end_time = end_length * time_resolution
+            return f'{start_time:.3f}-{end_time:.3f}'
 
-        # Calculate pairwise distances and store in signal_mass_scores
+        signal_data['node_id'] = signal_data.apply(lambda x: length_to_time_range(x['bin'].left, x['bin'].right), axis=1)
+
+        clusters_df = pd.DataFrame()
+
+        for node in signal_data['node_id'].unique():
+            signals_in_node = signal_data[signal_data['node_id'] == node]
+            cluster = self.calculate_group_clusters(signals_in_node)
+            clusters_df = pd.concat([clusters_df, cluster], ignore_index=True)
+
+        count_per_group = signal_data.groupby('node_id').size().reset_index(name='count')
+        signal_data = signal_data.merge(count_per_group, on='node_id')
+        output = signal_data.merge(clusters_df[['signal_id', 'cluster', 'cluster_count']], on='signal_id', how='left')
+        output = output[['node_id', 'signal_id', 'count', 'cluster', 'cluster_count']]
+
+
+        return output
+
+    def calculate_group_by_amplitude(self, signal_data):
+
+        signal_data['amplitude'] = signal_data['data'].apply(lambda x: (max(x) - min(x))/2)
+
+        # Determine number of bins
+        num_bins = int(np.sqrt(len(signal_data)))
+        signal_data['bin'], bin_edges = pd.cut(signal_data['amplitude'], bins=num_bins, retbins=True, labels=False)
+
+        def amplitude_range(bin_edge_left, bin_edge_right):
+            return f'{bin_edge_left:.3f}-{bin_edge_right:.3f}'
+
+        signal_data['node_id'] = signal_data.apply(
+            lambda x: amplitude_range(bin_edges[x['bin']], bin_edges[x['bin'] + 1] if x['bin'] + 1 < len(bin_edges) else bin_edges[-1]),
+            axis=1
+        )
+
+        clusters_df = pd.DataFrame()
+
+        for node in signal_data['node_id'].unique():
+            signals_in_node = signal_data[signal_data['node_id'] == node]
+            cluster = self.calculate_group_clusters(signals_in_node)
+            clusters_df = pd.concat([clusters_df, cluster], ignore_index=True)
+
+        count_per_group = signal_data.groupby('node_id').size().reset_index(name='count')
+        signal_data = signal_data.merge(count_per_group, on='node_id')
+        output = signal_data.merge(clusters_df[['signal_id', 'cluster', 'cluster_count']], on='signal_id', how='left')
+        output = output[['node_id', 'signal_id', 'count', 'cluster', 'cluster_count']]
+
+        return output
+    
+    def calculate_group_clusters(self, signal_data):
+        signal_data = signal_data.copy()
+
+        if len(signal_data) == 1:
+            signal_data.loc[:, 'cluster'] = 0
+            signal_data.loc[:, 'count'] = 1
+            signal_data.rename(columns={'count': 'cluster_count'}, inplace=True)
+            return signal_data[['cluster', 'signal_id', 'cluster_count']]
+
+        signal_data.loc[:, 'data'] = signal_data['data'].apply(lambda x: np.array(x))
+        signal_data.loc[:, 'signal_length'] = signal_data['data'].apply(lambda x: len(x))
+
+        distance_matrix = np.zeros((len(signal_data), len(signal_data)))
+
         for i in range(len(signal_data)):
-            for j in range(i + 1, len(signal_data)):
-                signal_i = signal_data[i][current_tab].values
-                signal_j = signal_data[j][current_tab].values
+            signal_a = signal_data.iloc[i]['data']
+            for j in range(i+1, len(signal_data)):
+                signal_b = signal_data.iloc[j]['data']
 
-                # Pad the shorter signal with zeros to make them the same length
-                if len(signal_i) > len(signal_j):
-                    signal_j = np.pad(signal_j, (0, len(signal_i) - len(signal_j)), 'constant')
-                else:
-                    signal_i = np.pad(signal_i, (0, len(signal_j) - len(signal_i)), 'constant')
+                if len(signal_a) > len(signal_b):
+                    signal_b = np.pad(signal_b, (0, len(signal_a) - len(signal_b)), 'constant')
+                elif len(signal_b) > len(signal_a):
+                    signal_a = np.pad(signal_a, (0, len(signal_b) - len(signal_a)), 'constant')
 
-                # Compute distance using STUMPY mass
-                distance = stumpy.mass(signal_i, signal_j)
+                distance = stumpy.mass(signal_a, signal_b)
+                distance_matrix[i, j] = distance[0]
+                distance_matrix[j, i] = distance[0]
 
-                # If there is a match, store the match in signal_mass_scores
-                if distance < self.mp_merging_sensitivity:
-                    signal_mass_scores[(i, j)] = distance
+        clustering = AgglomerativeClustering(n_clusters=None, metric='precomputed', linkage='average', distance_threshold=self.cluster_threshold).fit(distance_matrix)
+        signal_data.loc[:, 'cluster'] = clustering.labels_
 
-        # Assign signals to nodes based on signal_mass_scores
-        node_id = 0
-        signal_to_node = {}
+        count_per_group = signal_data.groupby('cluster').size().reset_index(name='cluster_count')
+        signal_data = signal_data.merge(count_per_group, on='cluster')
+        output = signal_data[['cluster', 'signal_id', 'cluster_count']]
 
-        for i in range(len(signal_data)):
-            # Check if the signal is already assigned to a node
-            assigned_node = None
+        return output
 
-            for (sig_i, sig_j), dist in signal_mass_scores.items():
-                if i == sig_i or i == sig_j:
-                    if sig_i in signal_to_node:
-                        assigned_node = signal_to_node[sig_i]
-                    elif sig_j in signal_to_node:
-                        assigned_node = signal_to_node[sig_j]
-                    break
 
-            # If the signal has a match, assign it to the same node as its match
-            if assigned_node is not None:
-                signal_to_node[i] = assigned_node
-            else:
-                # Otherwise, create a new node
-                signal_to_node[i] = node_id
-                node_id += 1
 
-            # Add the signal to the DataFrame
-            new_row = pd.DataFrame({'node_id': [signal_to_node[i]], 'signal_id': [i]})
-            signal_nodes = pd.concat([signal_nodes, new_row], ignore_index=True)
 
-        return signal_nodes
-
-    def merge_nodes(self, previous_nodes, prev_signal_data, curr_signal_data, current_tab):
-        """ Merge the previous nodes with the current nodes """
-
-        result_df = previous_nodes.copy()
-
-        last_node_id = previous_nodes['node_id'].max()
-        last_signal_id = previous_nodes['signal_id'].max()
-
-        # Assign signal IDs to the new signals by creating a dictionary
-        signal_id_dict = {}
-        current_signal_id = last_signal_id
-
-        for idx, signal_df in enumerate(curr_signal_data):
-            current_signal_id += 1
-            signal_id_dict[idx] = current_signal_id
-            signal_df['signal_id'] = current_signal_id
-
-        matched_signals = set()
-
-        # Iterate through each node in previous_nodes
-        for node in previous_nodes['node_id'].unique():
-            # Select the first signal in the node
-            representative_signal = prev_signal_data[0]
-
-            for idx, signal in enumerate(curr_signal_data):
-
-                if idx in matched_signals:
-                    continue  # Skip if already matched
-
-                signal_i = representative_signal[current_tab].values
-                signal_j = signal[current_tab].values
-
-                # Pad the shorter signal with zeros to make them the same length
-                if len(signal_i) > len(signal_j):
-                    signal_j = np.pad(signal_j, (0, len(signal_i) - len(signal_j)), 'constant')
-                else:
-                    signal_i = np.pad(signal_i, (0, len(signal_j) - len(signal_i)), 'constant')
-
-                # Compute distance using STUMPY mass
-                distance = stumpy.mass(signal_i, signal_j)
-
-                # If there is a match, merge the signals
-                if distance < self.mp_merging_sensitivity:
-                    # Get the signal ID from the dictionary using the current index
-                    signal_id = signal_id_dict[idx]
-                    
-                    # Merge the signals by inserting into the DataFrame
-                    new_row = pd.DataFrame({'node_id': [node], 'signal_id': [signal_id]})
-                    result_df = pd.concat([result_df, new_row], ignore_index=True)
-                    print(f'Merged signal {signal_id} into node {node}')
-                    matched_signals.add(idx)  # Mark signal as matched
-                    
-        # If no match is found, create a new node for each signal not already in a node
-        node_id = last_node_id + 1
-        for idx, signal in enumerate(curr_signal_data):
-            # Get the signal ID from the dictionary using the current index
-            signal_id = signal_id_dict[idx]
-            
-            if signal_id not in result_df['signal_id'].values:
-                new_row = pd.DataFrame({'node_id': [node_id], 'signal_id': [signal_id]})
-                result_df = pd.concat([result_df, new_row], ignore_index=True)
-                print(f'Created new node {node_id} for signal {signal_id}')
-                node_id += 1
-
-        return result_df
