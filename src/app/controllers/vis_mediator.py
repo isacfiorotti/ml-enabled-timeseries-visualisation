@@ -23,10 +23,6 @@ class VisMediator():
             "#FF8C00",  # Dark Orange
             "#CC3500",  # Darker Orange
             "#661A00",  # Very Dark Orange
-            "#007FFF",  # Vivid Sky Blue
-            "#3399FF",  # Bright Blue
-            "#0033CC",  # Medium Blue
-            "#A64D79",  # Light Purple
             "#9B4F7D",  # Medium Purple
             "#6D3F6C",  # Dark Purple
             "#2E2A80",  # Very Dark Purple
@@ -59,13 +55,11 @@ class VisMediator():
 
 
     def on_treemap_leave(self):
-        # self.grid_view.create_grid_view()
-        # self.color_processed_cells()
         self.is_hovering = False
         self.grid_view.create_grid_view()
         
         
-    def resolve_treemap_toggles(self): # This code is similar to treemap enter consider separating it into different things
+    def resolve_treemap_toggles(self):
         for node in self.toggled_nodes:
             signals_in_node = self.data_mediator.get_signals_in_node(node)
             for signal in signals_in_node:
@@ -75,8 +69,6 @@ class VisMediator():
 
     def on_grid_view_click(self, cell_id):
         data = self.data_mediator.get_cell_data(cell_id)
-
-        # get all signals in the cell
         signals = self.data_mediator._get_signals_in_cell(cell_id)
         colors = []
         if len(signals) > 0:
@@ -94,21 +86,14 @@ class VisMediator():
         self.grid_view.set_cell_clicked(cell_id)
 
     def on_tab_click(self, current_tab):
-
-        # End any previous subthreads
-
-        # Start the subthread to calculate the matrix profile
-
         self.data_mediator._set_current_tab(current_tab)
         grid_size = self.data_mediator.get_grid_size()
         self.grid_view.set_grid_size(grid_size)
-        # access the grid view row and column values 
         rows = self.grid_view.rows
         cols = self.grid_view.cols
 
         cell_starts = []
         for i in range(rows):
-            # always get the first cell in the row
             cell_name = f'cell_{i * cols}'
             cell_starts.append(self.data_mediator.get_cell_start_as_time(cell_name))
 
@@ -131,12 +116,6 @@ class VisMediator():
             self.grid_view.set_cell_clicked(cell_name=self.clicked_cell)
 
     def on_treemap_tab_click(self, tab):
-        # if tab == 'All':
-        #     start_time = time.time()
-        #     self.current_treemap_tab = tab
-        #     self.display_all_signals()
-        #     end_time = time.time()
-        #     print(f'function display_all_signals took: {end_time - start_time}')
         if tab == 'Duration (s)':
             self.current_treemap_tab = tab
             self.display_by_length()
@@ -144,22 +123,8 @@ class VisMediator():
             self.current_treemap_tab = tab
             self.display_by_amplitude()
 
-
-
-    # def display_all_signals(self):
-    #     # get all signals in the database
-    #     df = self.data_mediator._create_signal_df()
-
-    #     self.current_data = df
-
-    #     self.treemap_legend.clear_legend()        
-    #     # they don't have "nodes" so we need to give them one
-    #     df['count'] = 1
-    #     # send as normal to the 
-    #     self.treemap.create_treemap(node_counts=df['count'], labels=df['signal_id'], map_colors=['#29465B'])
-
     def display_by_length(self):
-        df = self.data_mediator.run_group_by_length() # make this funciton also return the leaves of the tree
+        df = self.data_mediator.run_group_by_length()
         self.current_data = df
 
         self.set_current_color_mapping()

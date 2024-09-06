@@ -9,21 +9,19 @@ class GridView(tk.Frame):
         self.parent = parent
         self.cell_starts = None
 
-        # Create a frame to hold the canvas
         self.frame = tk.Frame(self)
         self.frame.pack(fill='both', expand=True, side='top')
 
         self.axis_y = GridAxisY(self.frame)
         self.axis_y.pack(fill='y', side='left')
 
-        # Create a canvas frame
         self.canvas_frame = tk.Frame(self.frame)
         self.canvas_frame.pack(fill='both', expand=True, side='right')
 
         self.canvas = tk.Canvas(self.canvas_frame, background='white')
         self.canvas.pack(fill='both', expand=True)
         self.cells = {}
-        self.grid_size = None  # Start with grid_size as None
+        self.grid_size = None
         self.padding = 3
         self.canvas.bind("<Configure>", self.on_resize)
         self.vis_mediator = None
@@ -80,7 +78,6 @@ class GridView(tk.Frame):
                         self.cells[cell_name] = rect
                         cell_count += 1
 
-            # self.check_for_toggles() #disabled to until fixed way treemaps are created and destroyed
             self.check_for_clicked_cell()
 
             self.axis_y.update_ticks(self.rows, self.cols, self.padding, self.cell_starts)

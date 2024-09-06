@@ -379,7 +379,6 @@ class DataMediator():
             y_values = data[self.current_tab]
             signal_data.append({'signal_id': signal, 'data': y_values})
 
-       # join signal data with signal_df
         signal_data_df = pd.DataFrame(signal_data)
         signal_data_df = signal_df.merge(signal_data_df, on='signal_id') 
 

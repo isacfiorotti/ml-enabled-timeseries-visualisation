@@ -17,7 +17,6 @@ class TreemapLegend(tk.Frame):
     
         self.canvas.create_text(60, 10, text=title, fill="grey", font=("Arial", 10, "bold"))
 
-        # Starting y position for the first legend item
         y_position = 30
 
         for color, label in zip(colors, labels):

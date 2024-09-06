@@ -31,7 +31,6 @@ class GridAxisY(tk.Frame):
         if padding is not None:
             self.padding = padding
 
-        # Update ticks only if rows are defined
         if self.rows > 0:
             row_height = (height - (self.rows + 1) * self.padding) / self.rows
             
@@ -41,8 +40,5 @@ class GridAxisY(tk.Frame):
                     self.canvas.create_text(width / 1.4, y, text=f"{cell_starts[i][:-4]}", anchor='center', font=('Arial', 5, 'bold'), fill='grey')
                     self.canvas.create_text(width / 2.8, y, text=f"{i*self.cols}", anchor='center', font=('Arial', 6), fill='grey')
 
-
-
-        # Draw the Y-axis label but at an offset to not overlap with the grid lines
         offset = 20
-        self.canvas.create_text(width / 2 - offset, height / 2, text="First Row Cell ID and  Start Time", anchor='center', font=('Arial', 7), fill='grey', angle=90)
+        self.canvas.create_text(width / 2 - offset, height / 2, text="Row First Cell ID and  Start Time", anchor='center', font=('Arial', 7), fill='grey', angle=90)

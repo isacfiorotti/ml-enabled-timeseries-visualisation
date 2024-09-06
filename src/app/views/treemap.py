@@ -68,7 +68,6 @@ class TreemapView(tk.Frame):
         for rect, label, color in zip(rects, labels, child_colors):
             x0_rect, y0_rect, x1_rect, y1_rect = rect['x'], rect['y'], rect['x'] + rect['dx'], rect['y'] + rect['dy']
             rect_id = self.canvas.create_rectangle(x0_rect, y0_rect, x1_rect, y1_rect, fill=color, outline="white")
-            # self.canvas.create_text((x0_rect + x1_rect) / 2, (y0_rect + y1_rect) / 2, text=label, fill="darkgrey", font=("Arial", 6))
 
 
             if line_data is not None:
@@ -103,8 +102,6 @@ class TreemapView(tk.Frame):
         self.vis_mediator = vis_mediator
 
     def on_click(self, event, label):
-        # toggle = self.nodes[label]['toggle']
-        # self.vis_mediator.on_treemap_click(label, toggle)
         pass
 
     def on_enter(self, event, rect_id):

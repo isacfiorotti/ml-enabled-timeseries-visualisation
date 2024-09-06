@@ -37,10 +37,8 @@ class GridviewTabTop(tk.Frame):
         self.after(10, self.on_resize)
 
     def on_resize(self, event=None):
-        # Update canvas sizes and positions
         self.canvas_left.config(width=self.canvas.winfo_width() * 0.5, height=self.canvas.winfo_height())
         self.canvas_right.config(width=self.canvas.winfo_width() * 0.5, height=self.canvas.winfo_height())
         
-        # Update text positions
         self.canvas_left.coords(self.text_id_left, self.canvas_left.winfo_width() * 0.5, self.canvas_left.winfo_height() * 0.5)
         self.canvas_right.coords(self.text_id_right, self.canvas_right.winfo_width() * 0.5, self.canvas_right.winfo_height() * 0.5)
