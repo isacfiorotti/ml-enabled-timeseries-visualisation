@@ -3,8 +3,15 @@ from app.views.gui import MainWindow
 from app.controllers.data_mediator import DataMediator
 from app.models.database import SQLiteDB
 from app.models.data_processor import DataProcessor
+
 from app.config import FILE_PATH
 from app.config import WINDOW_TITLE
+from app.config import MP_WINDOW_SIZE
+from app.config import MP_THRESHOLD
+from app.config import GAP_THRESHOLD
+from app.config import BASE_SIGNAL_LENGTH
+from app.config import CLUSTER_THRESHOLD
+
 from app.models.matrix_profile_model import MatrixProfile
 import threading
 
@@ -15,7 +22,7 @@ def main():
 
     data_processor = DataProcessor(FILE_PATH) 
 
-    matrix_profile_model = MatrixProfile(120, 2, 0.01, 220)
+    matrix_profile_model = MatrixProfile(MP_WINDOW_SIZE, MP_THRESHOLD, GAP_THRESHOLD, BASE_SIGNAL_LENGTH, CLUSTER_THRESHOLD)
 
     db = SQLiteDB(FILE_PATH, data_processor)
     data_mediator = DataMediator(FILE_PATH, db, data_processor, matrix_profile_model)
