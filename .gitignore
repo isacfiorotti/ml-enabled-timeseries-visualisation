@@ -1,6 +1,5 @@
 __pycache__/
 *.py[cod]
-data
 src/app/.DS_Store
 src/.DS_Store
 .DS_Store
