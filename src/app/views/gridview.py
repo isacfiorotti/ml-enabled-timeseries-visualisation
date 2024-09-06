@@ -1,16 +1,34 @@
 import tkinter as tk
 from math import ceil, sqrt
+from app.views.gridview_axis_y import GridAxisY
+from app.views.gridview_axis_x import GridAxisX
 
 class GridView(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
-        self.canvas = tk.Canvas(self)
+        self.parent = parent
+        self.cell_starts = None
+
+        self.frame = tk.Frame(self)
+        self.frame.pack(fill='both', expand=True, side='top')
+
+        self.axis_y = GridAxisY(self.frame)
+        self.axis_y.pack(fill='y', side='left')
+
+        self.canvas_frame = tk.Frame(self.frame)
+        self.canvas_frame.pack(fill='both', expand=True, side='right')
+
+        self.canvas = tk.Canvas(self.canvas_frame, background='white')
         self.canvas.pack(fill='both', expand=True)
         self.cells = {}
-        self.grid_size = None  # Start with grid_size as None
+        self.grid_size = None
         self.padding = 3
         self.canvas.bind("<Configure>", self.on_resize)
         self.vis_mediator = None
+
+        self.axis_x = GridAxisX(self)
+        self.axis_x.pack(fill='x', side='bottom')
+
         self.check_for_processed_cells()
 
     def create_grid(self):
@@ -36,9 +54,13 @@ class GridView(tk.Frame):
             self.calculate_cell_dimensions()
             self.create_grid_view()
     
-    def create_grid_view(self):
+    def create_grid_view(self, cell_starts=None):
+
         self.canvas.delete("all")
-        
+
+        if cell_starts is not None:
+            self.cell_starts = cell_starts
+
         if self.grid_size is not None:
             cell_count = 0
             for i in range(self.rows):
@@ -56,8 +78,10 @@ class GridView(tk.Frame):
                         self.cells[cell_name] = rect
                         cell_count += 1
 
-            # self.check_for_toggles() #disabled to until fixed way treemaps are created and destroyed
             self.check_for_clicked_cell()
+
+            self.axis_y.update_ticks(self.rows, self.cols, self.padding, self.cell_starts)
+            self.axis_x.update_ticks(self.cols, self.padding)
 
     def set_vis_mediator(self, vis_mediator):
         self.vis_mediator = vis_mediator
@@ -84,7 +108,7 @@ class GridView(tk.Frame):
         if self.vis_mediator is not None:
             if not self.vis_mediator.is_hovering:
                 self.vis_mediator.color_processed_cells()
-        self.after(1000, self.check_for_processed_cells)
+        self.after(1, self.check_for_processed_cells)
 
     def check_for_clicked_cell(self):
         if hasattr(self, 'vis_mediator'):
@@ -97,4 +121,3 @@ class GridView(tk.Frame):
     def set_cell_unclicked(self, cell_name):
         if cell_name in self.cells:
             self.canvas.itemconfig(self.cells[cell_name], outline='#FAF9F6')
-

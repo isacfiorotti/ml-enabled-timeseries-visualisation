@@ -9,7 +9,7 @@ class TreemapTab(tk.Frame):
         self.canvas.pack(fill='both', expand=True)
         self.tabs = {}
         self.current_tab = None
-        self.headers = ['Length', 'Amplitude']
+        self.headers = ['Duration (s)', 'Amplitude']
         self.create_tabs(self.headers)
 
     def create_rounded_rectangle(self, x1, y1, x2, y2, radius=2, **kwargs):
@@ -52,13 +52,13 @@ class TreemapTab(tk.Frame):
             y2 = y_start + rect_height
             
             rect = self.create_rounded_rectangle(
-                x1,  # x1 position with 3 pixels space between rectangles
-                y1,  # y1 position
-                x2,  # x2 position
-                y2,  # y2 position
-                radius=10,  # Radius for rounded corners
-                fill=color,  # Fill color for rectangles
-                outline=color  # Outline color for rectangles
+                x1,
+                y1, 
+                x2,
+                y2,
+                radius=10,
+                fill=color,
+                outline=color 
             )
 
             text_x = (x1 + x2) / 2
@@ -67,8 +67,8 @@ class TreemapTab(tk.Frame):
             text = self.canvas.create_text(
                 text_x,
                 text_y,  
-                text=f'{headers[i]}',  # Text content
-                fill='grey',  # Text color
+                text=f'{headers[i]}',
+                fill='grey', 
                 font=('Arial', 10) 
             )
         

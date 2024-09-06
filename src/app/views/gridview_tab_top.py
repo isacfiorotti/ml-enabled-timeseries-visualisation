@@ -1,4 +1,5 @@
 import tkinter as tk
+from app.config import CHUNK_SIZE
 
 class GridviewTabTop(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
@@ -17,7 +18,7 @@ class GridviewTabTop(tk.Frame):
 
         self.text_id_left = self.canvas_left.create_text(
             0, 0,  # Temporary position
-            text='Time Grid with Binned Intervals      Bin Size: 25,000', # change to get binsize
+            text=f'Grid with Binned Intervals      Bin Size: {CHUNK_SIZE}',
             fill="grey", 
             font=("Helvetica", 10),
             anchor="center"
@@ -36,10 +37,8 @@ class GridviewTabTop(tk.Frame):
         self.after(10, self.on_resize)
 
     def on_resize(self, event=None):
-        # Update canvas sizes and positions
         self.canvas_left.config(width=self.canvas.winfo_width() * 0.5, height=self.canvas.winfo_height())
         self.canvas_right.config(width=self.canvas.winfo_width() * 0.5, height=self.canvas.winfo_height())
         
-        # Update text positions
         self.canvas_left.coords(self.text_id_left, self.canvas_left.winfo_width() * 0.5, self.canvas_left.winfo_height() * 0.5)
         self.canvas_right.coords(self.text_id_right, self.canvas_right.winfo_width() * 0.5, self.canvas_right.winfo_height() * 0.5)

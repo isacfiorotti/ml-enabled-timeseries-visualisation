@@ -4,22 +4,19 @@ import re
 class TreemapLegend(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
-
         self.parent = parent
         self.canvas = tk.Canvas(self, width=120)
         self.canvas.pack(fill='both', expand=False)
 
         self.bind('<Configure>', self.on_resize)
 
-    def draw_legend(self, colors, labels):
+    def draw_legend(self, colors, labels, title):
         self.canvas.delete("all")
 
         labels = sorted(labels, key=self.extract_start)
     
-        title = "Treemap Legend"
         self.canvas.create_text(60, 10, text=title, fill="grey", font=("Arial", 10, "bold"))
 
-        # Starting y position for the first legend item
         y_position = 30
 
         for color, label in zip(colors, labels):

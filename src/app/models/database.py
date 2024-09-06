@@ -1,18 +1,16 @@
 import sqlite3
 import os
 import re
-import time
 
 class SQLiteDB():
     def __init__(self, file_path, data_processor):
         self.data_processor = data_processor
         self.db_directory = os.path.dirname(file_path)
-        self.prefix = self._get_db_prefix(file_path)  # Takes input data file path
+        self.prefix = self._get_db_prefix(file_path)
         self._connect_to_db()
-        # if not self._check_for_existing_db( , need to make the cheks more sophisticated
-        # self._create_tables()
-        # self._insert_cells()
-        # self._insert_data()
+        self._create_tables()
+        self._insert_cells()
+        self._insert_data()
 
     def _check_for_existing_db(self):
         '''Check if the database already exists. If it does, return True.'''
